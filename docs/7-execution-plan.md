@@ -262,14 +262,14 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] POST /api/todos 엔드포인트 작성 (authMiddleware 장식)
-- [ ] 요청 body: { title, description, due_date }
-- [ ] 입력 검증: title(필수, 1~100자), due_date(ISO 8601 형식)
-- [ ] UUID 자동 생성 (todo_id)
-- [ ] user_id는 req.user에서 자동 획득
-- [ ] status 기본값: "pending"
-- [ ] 성공 응답: 201, { todo_id, user_id, title, description, due_date, status, created_at, updated_at }
-- [ ] AC-06, AC-07 만족 - AC-06 할일 생성 성공 (201), AC-07 미인증 시도 401
+- [x] POST /api/todos 엔드포인트 작성 (authMiddleware 장식)
+- [x] 요청 body: { title, description, due_date }
+- [x] 입력 검증: title(필수, 1~100자), due_date(ISO 8601 형식)
+- [x] UUID 자동 생성 (todo_id)
+- [x] user_id는 req.user에서 자동 획득
+- [x] status 기본값: "pending"
+- [x] 성공 응답: 201, { todo_id, user_id, title, description, due_date, status, created_at, updated_at }
+- [x] AC-06, AC-07 만족 - AC-06 할일 생성 성공 (201), AC-07 미인증 시도 401
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-05
@@ -286,20 +286,20 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] GET /api/todos 엔드포인트 작성 (authMiddleware 장식)
-- [ ] Query 파라미터:
-  - [ ] status: pending|completed (필터, 기본값: 전체)
-  - [ ] sort: due_date_asc|due_date_desc|created_at_asc|created_at_desc (기본값: due_date_asc)
-  - [ ] q: 키워드 (title, description LIKE 부분 일치)
-- [ ] is_overdue 런타임 계산 (KST 기준 오늘 날짜 > due_date AND status = 'pending')
-- [ ] 응답 데이터:
-  - [ ] overdue 그룹: is_overdue = true인 항목들 (먼저)
-  - [ ] normal 그룹: is_overdue = false인 항목들 (나중)
-  - [ ] 각 그룹 내에서 정렬 규칙 적용
-- [ ] SQL WHERE 절: user_id = $1 AND (status = $2 OR $2 IS NULL)
-- [ ] 키워드 검색: WHERE title ILIKE '%{q}%' OR description ILIKE '%{q}%'
-- [ ] 성공 응답: 200, { overdue: [...], normal: [...] }
-- [ ] AC-11 만족 (기한 초과 항목 최상단 그룹 표시)
+- [x] GET /api/todos 엔드포인트 작성 (authMiddleware 장식)
+- [x] Query 파라미터:
+  - [x] status: pending|completed (필터, 기본값: 전체)
+  - [x] sort: due_date_asc|due_date_desc|created_at_asc|created_at_desc (기본값: due_date_asc)
+  - [x] q: 키워드 (title, description LIKE 부분 일치)
+- [x] is_overdue 런타임 계산 (KST 기준 오늘 날짜 > due_date AND status = 'pending')
+- [x] 응답 데이터:
+  - [x] overdue 그룹: is_overdue = true인 항목들 (먼저)
+  - [x] normal 그룹: is_overdue = false인 항목들 (나중)
+  - [x] 각 그룹 내에서 정렬 규칙 적용
+- [x] SQL WHERE 절: user_id = $1 AND (status = $2 OR $2 IS NULL)
+- [x] 키워드 검색: WHERE title ILIKE '%{q}%' OR description ILIKE '%{q}%'
+- [x] 성공 응답: 200, { overdue: [...], normal: [...] }
+- [x] AC-11 만족 (기한 초과 항목 최상단 그룹 표시)
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-05, BE-08
@@ -316,12 +316,12 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] GET /api/todos/:id 엔드포인트 작성 (authMiddleware 장식)
-- [ ] todo_id로 todos 테이블 조회
-- [ ] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
-- [ ] 성공 응답: 200, { todo_id, user_id, title, description, due_date, status, is_overdue, created_at, updated_at }
-- [ ] 할일 없음: 404, { error: "Todo not found" }
-- [ ] 타인 할일 접근: 403, { error: "Forbidden" } - AC-12 만족
+- [x] GET /api/todos/:id 엔드포인트 작성 (authMiddleware 장식)
+- [x] todo_id로 todos 테이블 조회
+- [x] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
+- [x] 성공 응답: 200, { todo_id, user_id, title, description, due_date, status, is_overdue, created_at, updated_at }
+- [x] 할일 없음: 404, { error: "Todo not found" }
+- [x] 타인 할일 접근: 403, { error: "Forbidden" } - AC-12 만족
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-05, BE-08

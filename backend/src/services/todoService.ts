@@ -1,0 +1,59 @@
+import { v4 as uuidv4 } from 'uuid';
+import {
+  insertTodo,
+  findTodosByUserId,
+  findTodoById,
+} from '../repositories/todoRepository';
+import { calcIsOverdue } from '../utils/kst';
+import { Todo, SortOption, TodoListResponse } from '../types';
+import { AppError } from './authService';
+
+export async function createTodo(
+  user_id: string,
+  title: string,
+  description: string | null,
+  due_date: string
+): Promise<Todo> {
+  const todo_id = uuidv4();
+  const row = await insertTodo(todo_id, user_id, title, description, due_date);
+  return {
+    ...row,
+    is_overdue: calcIsOverdue(row.due_date, row.status),
+  };
+}
+
+export async function getTodos(
+  user_id: string,
+  status?: 'pending' | 'completed',
+  sort?: SortOption,
+  q?: string
+): Promise<TodoListResponse> {
+  const rows = await findTodosByUserId(user_id, status, sort, q);
+
+  const withOverdue = rows.map((row) => ({
+    ...row,
+    is_overdue: calcIsOverdue(row.due_date, row.status),
+  }));
+
+  return {
+    overdue: withOverdue.filter((t) => t.is_overdue),
+    normal: withOverdue.filter((t) => !t.is_overdue),
+  };
+}
+
+export async function getTodoById(todo_id: string, user_id: string): Promise<Todo> {
+  const row = await findTodoById(todo_id);
+
+  if (!row) {
+    throw new AppError('TODO_NOT_FOUND', 404, '해당 할일을 찾을 수 없습니다.');
+  }
+
+  if (row.user_id !== user_id) {
+    throw new AppError('FORBIDDEN', 403, '접근 권한이 없습니다.');
+  }
+
+  return {
+    ...row,
+    is_overdue: calcIsOverdue(row.due_date, row.status),
+  };
+}

@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { testConnection } from './config/database';
 import authRouter from './routes/authRouter';
+import todoRouter from './routes/todoRouter';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/todos', todoRouter);
 
 async function startServer(): Promise<void> {
   try {

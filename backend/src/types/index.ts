@@ -19,3 +19,26 @@ declare global {
     }
   }
 }
+
+export interface Todo {
+  todo_id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  due_date: string; // YYYY-MM-DD
+  status: 'pending' | 'completed';
+  is_overdue?: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export type SortOption =
+  | 'due_date_asc'
+  | 'due_date_desc'
+  | 'created_at_asc'
+  | 'created_at_desc';
+
+export interface TodoListResponse {
+  overdue: Todo[];
+  normal: Todo[];
+}
