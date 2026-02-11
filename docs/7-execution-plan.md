@@ -102,13 +102,13 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] `backend/` 폴더 생성
-- [ ] `package.json` 작성 (express, pg, bcrypt, jsonwebtoken, dotenv, cors, uuid, typescript 등)
-- [ ] `tsconfig.json` 작성 (strict: true, target: ES2020, module: commonjs)
-- [ ] `.env.example` 파일 작성 (DB_URL, JWT_SECRET, NODE_ENV, PORT 포함)
-- [ ] 폴더 구조 생성: src/{config, types, middlewares, routes, controllers, services, repositories, utils}
-- [ ] `npm install` 실행 완료
-- [ ] `npm run build` 성공 (빌드 스크립트 설정)
+- [x] `backend/` 폴더 생성
+- [x] `package.json` 작성 (express, pg, bcrypt, jsonwebtoken, dotenv, cors, uuid, typescript 등)
+- [x] `tsconfig.json` 작성 (strict: true, target: ES2020, module: commonjs)
+- [x] `.env.example` 파일 작성 (DB_URL, JWT_SECRET, NODE_ENV, PORT 포함)
+- [x] 폴더 구조 생성: src/{config, types, middlewares, routes, controllers, services, repositories, utils}
+- [x] `npm install` 실행 완료
+- [x] `npm run build` 성공 (빌드 스크립트 설정)
 
 **의존성**:
 - 선행 필요: 없음
@@ -125,12 +125,12 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] `src/config/database.ts` 작성 (pg.Pool 인스턴스, 환경변수 로드)
-- [ ] Connection pool 설정 (max 20, idleTimeoutMillis 30000)
-- [ ] `src/utils/db.ts` 작성 (query, queryOne, execute 헬퍼 함수)
-- [ ] 환경변수 검증 (DB_URL 필수 확인)
-- [ ] 프로젝트 시작 시 DB 연결 테스트 (SELECT 1 쿼리)
-- [ ] 연결 실패 시 프로세스 종료 에러 처리
+- [x] `src/config/database.ts` 작성 (pg.Pool 인스턴스, 환경변수 로드)
+- [x] Connection pool 설정 (max 20, idleTimeoutMillis 30000)
+- [x] `src/utils/db.ts` 작성 (query, queryOne, execute 헬퍼 함수)
+- [x] 환경변수 검증 (DB_URL 필수 확인)
+- [x] 프로젝트 시작 시 DB 연결 테스트 (SELECT 1 쿼리)
+- [x] 연결 실패 시 프로세스 종료 에러 처리
 
 **의존성**:
 - 선행 필요: BE-01, DB-01
@@ -147,14 +147,14 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] POST /api/auth/signup 엔드포인트 작성
-- [ ] 요청 body: { email, password, name }
-- [ ] 이메일 중복 검사 (UNIQUE 제약 존중, DB 쿼리)
-- [ ] 비밀번호 bcrypt 해싱 (cost factor 12)
-- [ ] UUID 자동 생성 (user_id)
-- [ ] 성공 응답: 201, { user_id, email, name }
-- [ ] 중복 이메일: 400, { error: "Email already exists" }
-- [ ] 입력 검증: email(이메일 형식), password(최소 8자), name(필수) - AC-02 만족
+- [x] POST /api/auth/signup 엔드포인트 작성
+- [x] 요청 body: { email, password, name }
+- [x] 이메일 중복 검사 (UNIQUE 제약 존중, DB 쿼리)
+- [x] 비밀번호 bcrypt 해싱 (cost factor 12)
+- [x] UUID 자동 생성 (user_id)
+- [x] 성공 응답: 201, { user_id, email, name }
+- [x] 중복 이메일: 400, { error: "Email already exists" }
+- [x] 입력 검증: email(이메일 형식), password(최소 8자), name(필수) - AC-02 만족
 
 **의존성**:
 - 선행 필요: BE-01, BE-02
@@ -171,15 +171,15 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] POST /api/auth/login 엔드포인트 작성
-- [ ] 요청 body: { email, password }
-- [ ] users 테이블에서 이메일로 조회
-- [ ] bcrypt 비밀번호 검증
-- [ ] JWT Access Token 생성 (15분 만료, 메모리 저장용)
-- [ ] JWT Refresh Token 생성 (7일 만료, HttpOnly Cookie 저장)
-- [ ] 성공 응답: 200, { access_token, user: { user_id, email, name } }
-- [ ] Refresh Token HttpOnly Cookie 설정 (Secure, SameSite=Strict)
-- [ ] 실패 응답: 401, { error: "Invalid email or password" } - AC-04 만족
+- [x] POST /api/auth/login 엔드포인트 작성
+- [x] 요청 body: { email, password }
+- [x] users 테이블에서 이메일로 조회
+- [x] bcrypt 비밀번호 검증
+- [x] JWT Access Token 생성 (15분 만료, 메모리 저장용)
+- [x] JWT Refresh Token 생성 (7일 만료, HttpOnly Cookie 저장)
+- [x] 성공 응답: 200, { access_token, user: { user_id, email, name } }
+- [x] Refresh Token HttpOnly Cookie 설정 (Secure, SameSite=Strict)
+- [x] 실패 응답: 401, { error: "Invalid email or password" } - AC-04 만족
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-03
@@ -196,13 +196,13 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] `src/middlewares/auth.ts` 작성 (authMiddleware 함수)
-- [ ] Authorization: Bearer {token} 헤더 파싱
-- [ ] JWT 서명 검증 및 만료 확인
-- [ ] 토큰 유효: req.user = { user_id, email } 설정
-- [ ] 토큰 없음: 401, { error: "Unauthorized" }
-- [ ] 토큰 만료/무효: 401, { error: "Token expired or invalid" }
-- [ ] 보호된 라우트 장식 설정 가능
+- [x] `src/middlewares/auth.ts` 작성 (authMiddleware 함수)
+- [x] Authorization: Bearer {token} 헤더 파싱
+- [x] JWT 서명 검증 및 만료 확인
+- [x] 토큰 유효: req.user = { user_id, email } 설정
+- [x] 토큰 없음: 401, { error: "Unauthorized" }
+- [x] 토큰 만료/무효: 401, { error: "Token expired or invalid" }
+- [x] 보호된 라우트 장식 설정 가능
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-04
@@ -219,13 +219,13 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] POST /api/auth/refresh 엔드포인트 작성
-- [ ] HttpOnly Cookie에서 refreshToken 추출
-- [ ] JWT Refresh Token 검증 (만료 확인)
-- [ ] 새로운 Access Token 생성 (15분 만료)
-- [ ] 성공 응답: 200, { access_token }
-- [ ] Refresh Token 만료: 401, { error: "Refresh token expired" }
-- [ ] 요청 실패 시 새 Refresh Token 발급 불가
+- [x] POST /api/auth/refresh 엔드포인트 작성
+- [x] HttpOnly Cookie에서 refreshToken 추출
+- [x] JWT Refresh Token 검증 (만료 확인)
+- [x] 새로운 Access Token 생성 (15분 만료)
+- [x] 성공 응답: 200, { access_token }
+- [x] Refresh Token 만료: 401, { error: "Refresh token expired" }
+- [x] 요청 실패 시 새 Refresh Token 발급 불가
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-04, BE-05
@@ -242,10 +242,10 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] POST /api/auth/logout 엔드포인트 작성
-- [ ] refreshToken HttpOnly Cookie 삭제 (maxAge: 0)
-- [ ] 성공 응답: 200, { message: "Logged out" }
-- [ ] 미인증 요청도 200 응답 (멱등성)
+- [x] POST /api/auth/logout 엔드포인트 작성
+- [x] refreshToken HttpOnly Cookie 삭제 (maxAge: 0)
+- [x] 성공 응답: 200, { message: "Logged out" }
+- [x] 미인증 요청도 200 응답 (멱등성)
 
 **의존성**:
 - 선행 필요: BE-01, BE-02
