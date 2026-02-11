@@ -115,3 +115,30 @@ describe('validateCreateTodo', () => {
     expect(errors.some((e: any) => e.field === 'description')).toBe(true);
   });
 });
+
+describe('validateUpdateTodo', () => {
+  const { validateUpdateTodo } = require('../../utils/validation');
+
+  it('should pass for valid full input', () => {
+    expect(validateUpdateTodo('제목', '2026-02-20', '설명', 'completed')).toHaveLength(0);
+  });
+
+  it('should pass when status is omitted', () => {
+    expect(validateUpdateTodo('제목', '2026-02-20')).toHaveLength(0);
+  });
+
+  it('should fail when title is missing', () => {
+    const errors = validateUpdateTodo(undefined, '2026-02-20');
+    expect(errors.some((e: any) => e.field === 'title')).toBe(true);
+  });
+
+  it('should fail when due_date is invalid', () => {
+    const errors = validateUpdateTodo('제목', 'invalid');
+    expect(errors.some((e: any) => e.field === 'due_date')).toBe(true);
+  });
+
+  it('should fail when status is invalid value', () => {
+    const errors = validateUpdateTodo('제목', '2026-02-20', undefined, 'invalid_status');
+    expect(errors.some((e: any) => e.field === 'status')).toBe(true);
+  });
+});

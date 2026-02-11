@@ -3,6 +3,9 @@ import {
   createTodoController,
   getTodosController,
   getTodoByIdController,
+  updateTodoController,
+  updateTodoStatusController,
+  deleteTodoController,
 } from '../../controllers/todoController';
 import * as todoService from '../../services/todoService';
 import { AppError } from '../../services/authService';
@@ -12,6 +15,9 @@ jest.mock('../../services/todoService');
 const mockCreateTodo = todoService.createTodo as jest.Mock;
 const mockGetTodos = todoService.getTodos as jest.Mock;
 const mockGetTodoById = todoService.getTodoById as jest.Mock;
+const mockUpdateTodo = todoService.updateTodo as jest.Mock;
+const mockUpdateTodoStatus = todoService.updateTodoStatus as jest.Mock;
+const mockDeleteTodo = todoService.deleteTodo as jest.Mock;
 
 const MOCK_TODO = {
   todo_id: 'todo-uuid-1',
@@ -158,5 +164,126 @@ describe('getTodoByIdController', () => {
     await getTodoByIdController(req, res);
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'FORBIDDEN' }));
+  });
+});
+
+describe('updateTodoController', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should return 400 when title is missing', async () => {
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: { due_date: '2026-02-20' } });
+    const res = mockRes();
+    await updateTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'VALIDATION_ERROR' }));
+  });
+
+  it('should return 400 when due_date is invalid', async () => {
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: { title: '제목', due_date: 'bad' } });
+    const res = mockRes();
+    await updateTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it('should return 200 with updated todo on success', async () => {
+    mockUpdateTodo.mockResolvedValue({ ...MOCK_TODO, title: '수정됨' });
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: { title: '수정됨', due_date: '2026-02-20' } });
+    const res = mockRes();
+    await updateTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ title: '수정됨' }));
+  });
+
+  it('should return 404 when todo not found', async () => {
+    mockUpdateTodo.mockRejectedValue(new AppError('TODO_NOT_FOUND', 404, '해당 할일을 찾을 수 없습니다.'));
+    const req = mockReq({ params: { id: 'not-exist' }, body: { title: '제목', due_date: '2026-02-20' } });
+    const res = mockRes();
+    await updateTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('should return 403 when not owner', async () => {
+    mockUpdateTodo.mockRejectedValue(new AppError('FORBIDDEN', 403, '접근 권한이 없습니다.'));
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: { title: '제목', due_date: '2026-02-20' } });
+    const res = mockRes();
+    await updateTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+});
+
+describe('updateTodoStatusController', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should return 400 for invalid status value', async () => {
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: { status: 'invalid' } });
+    const res = mockRes();
+    await updateTodoStatusController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'INVALID_STATUS' }));
+  });
+
+  it('should return 400 when status is missing', async () => {
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: {} });
+    const res = mockRes();
+    await updateTodoStatusController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it('should return 200 with updated todo on success', async () => {
+    mockUpdateTodoStatus.mockResolvedValue({ ...MOCK_TODO, status: 'completed' });
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: { status: 'completed' } });
+    const res = mockRes();
+    await updateTodoStatusController(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ status: 'completed' }));
+  });
+
+  it('should return 404 when todo not found', async () => {
+    mockUpdateTodoStatus.mockRejectedValue(new AppError('TODO_NOT_FOUND', 404, '해당 할일을 찾을 수 없습니다.'));
+    const req = mockReq({ params: { id: 'not-exist' }, body: { status: 'completed' } });
+    const res = mockRes();
+    await updateTodoStatusController(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('should return 403 when not owner', async () => {
+    mockUpdateTodoStatus.mockRejectedValue(new AppError('FORBIDDEN', 403, '접근 권한이 없습니다.'));
+    const req = mockReq({ params: { id: 'todo-uuid-1' }, body: { status: 'pending' } });
+    const res = mockRes();
+    await updateTodoStatusController(req, res);
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+});
+
+describe('deleteTodoController', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should return 204 on successful delete', async () => {
+    mockDeleteTodo.mockResolvedValue(undefined);
+    const req = mockReq({ params: { id: 'todo-uuid-1' } });
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    } as unknown as Response;
+    await deleteTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.send).toHaveBeenCalled();
+  });
+
+  it('should return 404 when todo not found', async () => {
+    mockDeleteTodo.mockRejectedValue(new AppError('TODO_NOT_FOUND', 404, '해당 할일을 찾을 수 없습니다.'));
+    const req = mockReq({ params: { id: 'not-exist' } });
+    const res = mockRes();
+    await deleteTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('should return 403 when not owner', async () => {
+    mockDeleteTodo.mockRejectedValue(new AppError('FORBIDDEN', 403, '접근 권한이 없습니다.'));
+    const req = mockReq({ params: { id: 'todo-uuid-1' } });
+    const res = mockRes();
+    await deleteTodoController(req, res);
+    expect(res.status).toHaveBeenCalledWith(403);
   });
 });

@@ -3,6 +3,9 @@ import {
   insertTodo,
   findTodosByUserId,
   findTodoById,
+  updateTodo as repoUpdateTodo,
+  updateTodoStatus as repoUpdateTodoStatus,
+  deleteTodoById,
 } from '../repositories/todoRepository';
 import { calcIsOverdue } from '../utils/kst';
 import { Todo, SortOption, TodoListResponse } from '../types';
@@ -56,4 +59,65 @@ export async function getTodoById(todo_id: string, user_id: string): Promise<Tod
     ...row,
     is_overdue: calcIsOverdue(row.due_date, row.status),
   };
+}
+
+export async function updateTodo(
+  todo_id: string,
+  user_id: string,
+  title: string,
+  description: string | null,
+  due_date: string,
+  status?: 'pending' | 'completed'
+): Promise<Todo> {
+  const existing = await findTodoById(todo_id);
+
+  if (!existing) {
+    throw new AppError('TODO_NOT_FOUND', 404, '해당 할일을 찾을 수 없습니다.');
+  }
+  if (existing.user_id !== user_id) {
+    throw new AppError('FORBIDDEN', 403, '접근 권한이 없습니다.');
+  }
+
+  const resolvedStatus = status ?? existing.status;
+  const updated = await repoUpdateTodo(todo_id, title, description, due_date, resolvedStatus);
+
+  return {
+    ...updated!,
+    is_overdue: calcIsOverdue(updated!.due_date, updated!.status),
+  };
+}
+
+export async function updateTodoStatus(
+  todo_id: string,
+  user_id: string,
+  status: 'pending' | 'completed'
+): Promise<Todo> {
+  const existing = await findTodoById(todo_id);
+
+  if (!existing) {
+    throw new AppError('TODO_NOT_FOUND', 404, '해당 할일을 찾을 수 없습니다.');
+  }
+  if (existing.user_id !== user_id) {
+    throw new AppError('FORBIDDEN', 403, '접근 권한이 없습니다.');
+  }
+
+  const updated = await repoUpdateTodoStatus(todo_id, status);
+
+  return {
+    ...updated!,
+    is_overdue: calcIsOverdue(updated!.due_date, updated!.status),
+  };
+}
+
+export async function deleteTodo(todo_id: string, user_id: string): Promise<void> {
+  const existing = await findTodoById(todo_id);
+
+  if (!existing) {
+    throw new AppError('TODO_NOT_FOUND', 404, '해당 할일을 찾을 수 없습니다.');
+  }
+  if (existing.user_id !== user_id) {
+    throw new AppError('FORBIDDEN', 403, '접근 권한이 없습니다.');
+  }
+
+  await deleteTodoById(todo_id);
 }

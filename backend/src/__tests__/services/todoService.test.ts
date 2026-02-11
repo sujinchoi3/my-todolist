@@ -1,4 +1,4 @@
-import { createTodo, getTodos, getTodoById } from '../../services/todoService';
+import { createTodo, getTodos, getTodoById, updateTodo, updateTodoStatus, deleteTodo } from '../../services/todoService';
 import * as todoRepo from '../../repositories/todoRepository';
 import * as kst from '../../utils/kst';
 
@@ -9,6 +9,9 @@ const mockInsertTodo = todoRepo.insertTodo as jest.Mock;
 const mockFindTodosByUserId = todoRepo.findTodosByUserId as jest.Mock;
 const mockFindTodoById = todoRepo.findTodoById as jest.Mock;
 const mockCalcIsOverdue = kst.calcIsOverdue as jest.Mock;
+const mockUpdateTodo = todoRepo.updateTodo as jest.Mock;
+const mockUpdateTodoStatus = todoRepo.updateTodoStatus as jest.Mock;
+const mockDeleteTodoById = todoRepo.deleteTodoById as jest.Mock;
 
 const MOCK_ROW = {
   todo_id: 'todo-uuid-1',
@@ -99,6 +102,106 @@ describe('getTodoById', () => {
     mockFindTodoById.mockResolvedValue({ ...MOCK_ROW, user_id: 'other-user' });
 
     await expect(getTodoById('todo-uuid-1', 'user-uuid-1')).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+      httpStatus: 403,
+    });
+  });
+});
+
+describe('updateTodo (service)', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should return updated todo with is_overdue', async () => {
+    mockFindTodoById.mockResolvedValue(MOCK_ROW);
+    mockUpdateTodo.mockResolvedValue({ ...MOCK_ROW, title: '수정됨' });
+    mockCalcIsOverdue.mockReturnValue(false);
+
+    const result = await updateTodo('todo-uuid-1', 'user-uuid-1', '수정됨', null, '2026-02-20');
+
+    expect(result.title).toBe('수정됨');
+    expect(result.is_overdue).toBe(false);
+  });
+
+  it('should use existing status when status not provided', async () => {
+    mockFindTodoById.mockResolvedValue({ ...MOCK_ROW, status: 'completed' });
+    mockUpdateTodo.mockResolvedValue({ ...MOCK_ROW, status: 'completed' });
+    mockCalcIsOverdue.mockReturnValue(false);
+
+    await updateTodo('todo-uuid-1', 'user-uuid-1', '제목', null, '2026-02-20', undefined);
+
+    expect(mockUpdateTodo).toHaveBeenCalledWith(
+      'todo-uuid-1', '제목', null, '2026-02-20', 'completed'
+    );
+  });
+
+  it('should throw 404 when todo not found', async () => {
+    mockFindTodoById.mockResolvedValue(null);
+    await expect(updateTodo('not-exist', 'user-uuid-1', '제목', null, '2026-02-20')).rejects.toMatchObject({
+      code: 'TODO_NOT_FOUND',
+      httpStatus: 404,
+    });
+  });
+
+  it('should throw 403 when todo belongs to different user', async () => {
+    mockFindTodoById.mockResolvedValue({ ...MOCK_ROW, user_id: 'other-user' });
+    await expect(updateTodo('todo-uuid-1', 'user-uuid-1', '제목', null, '2026-02-20')).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+      httpStatus: 403,
+    });
+  });
+});
+
+describe('updateTodoStatus (service)', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should return updated todo with new status', async () => {
+    mockFindTodoById.mockResolvedValue(MOCK_ROW);
+    mockUpdateTodoStatus.mockResolvedValue({ ...MOCK_ROW, status: 'completed' });
+    mockCalcIsOverdue.mockReturnValue(false);
+
+    const result = await updateTodoStatus('todo-uuid-1', 'user-uuid-1', 'completed');
+    expect(result.status).toBe('completed');
+  });
+
+  it('should throw 404 when todo not found', async () => {
+    mockFindTodoById.mockResolvedValue(null);
+    await expect(updateTodoStatus('not-exist', 'user-uuid-1', 'completed')).rejects.toMatchObject({
+      code: 'TODO_NOT_FOUND',
+      httpStatus: 404,
+    });
+  });
+
+  it('should throw 403 when not owner', async () => {
+    mockFindTodoById.mockResolvedValue({ ...MOCK_ROW, user_id: 'other-user' });
+    await expect(updateTodoStatus('todo-uuid-1', 'user-uuid-1', 'completed')).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+      httpStatus: 403,
+    });
+  });
+});
+
+describe('deleteTodo (service)', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should resolve without error when authorized', async () => {
+    mockFindTodoById.mockResolvedValue(MOCK_ROW);
+    mockDeleteTodoById.mockResolvedValue(1);
+
+    await expect(deleteTodo('todo-uuid-1', 'user-uuid-1')).resolves.toBeUndefined();
+    expect(mockDeleteTodoById).toHaveBeenCalledWith('todo-uuid-1');
+  });
+
+  it('should throw 404 when todo not found', async () => {
+    mockFindTodoById.mockResolvedValue(null);
+    await expect(deleteTodo('not-exist', 'user-uuid-1')).rejects.toMatchObject({
+      code: 'TODO_NOT_FOUND',
+      httpStatus: 404,
+    });
+  });
+
+  it('should throw 403 when not owner', async () => {
+    mockFindTodoById.mockResolvedValue({ ...MOCK_ROW, user_id: 'other-user' });
+    await expect(deleteTodo('todo-uuid-1', 'user-uuid-1')).rejects.toMatchObject({
       code: 'FORBIDDEN',
       httpStatus: 403,
     });

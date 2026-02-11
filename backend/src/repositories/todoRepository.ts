@@ -1,4 +1,4 @@
-import { query, queryOne } from '../utils/db';
+import { query, queryOne, execute } from '../utils/db';
 import { Todo, SortOption } from '../types';
 
 type TodoRow = Omit<Todo, 'is_overdue'>;
@@ -64,6 +64,42 @@ export async function findTodoById(todo_id: string): Promise<TodoRow | null> {
     `SELECT todo_id, user_id, title, description, due_date::text AS due_date, status, created_at, updated_at
      FROM todos
      WHERE todo_id = $1`,
+    [todo_id]
+  );
+}
+
+export async function updateTodo(
+  todo_id: string,
+  title: string,
+  description: string | null,
+  due_date: string,
+  status: 'pending' | 'completed'
+): Promise<TodoRow | null> {
+  return queryOne<TodoRow>(
+    `UPDATE todos
+     SET title = $2, description = $3, due_date = $4, status = $5, updated_at = NOW()
+     WHERE todo_id = $1
+     RETURNING todo_id, user_id, title, description, due_date::text AS due_date, status, created_at, updated_at`,
+    [todo_id, title, description, due_date, status]
+  );
+}
+
+export async function updateTodoStatus(
+  todo_id: string,
+  status: 'pending' | 'completed'
+): Promise<TodoRow | null> {
+  return queryOne<TodoRow>(
+    `UPDATE todos
+     SET status = $2, updated_at = NOW()
+     WHERE todo_id = $1
+     RETURNING todo_id, user_id, title, description, due_date::text AS due_date, status, created_at, updated_at`,
+    [todo_id, status]
+  );
+}
+
+export async function deleteTodoById(todo_id: string): Promise<number> {
+  return execute(
+    `DELETE FROM todos WHERE todo_id = $1`,
     [todo_id]
   );
 }

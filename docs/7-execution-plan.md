@@ -338,13 +338,13 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] PUT /api/todos/:id 엔드포인트 작성 (authMiddleware 장식)
-- [ ] 요청 body: { title, description, due_date, status }
-- [ ] 입력 검증: title, due_date 필드
-- [ ] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
-- [ ] updated_at 자동 갱신
-- [ ] 성공 응답: 200, { 수정된 할일 객체 }
-- [ ] AC-08 만족 (할일 수정 즉시 반영)
+- [x] PUT /api/todos/:id 엔드포인트 작성 (authMiddleware 장식)
+- [x] 요청 body: { title, description, due_date, status }
+- [x] 입력 검증: title, due_date 필드
+- [x] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
+- [x] updated_at 자동 갱신
+- [x] 성공 응답: 200, { 수정된 할일 객체 }
+- [x] AC-08 만족 (할일 수정 즉시 반영)
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-05, BE-08
@@ -361,12 +361,12 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] PATCH /api/todos/:id/status 엔드포인트 작성 (authMiddleware 장식)
-- [ ] 요청 body: { status } (pending|completed)
-- [ ] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
-- [ ] updated_at 자동 갱신
-- [ ] 성공 응답: 200, { 수정된 할일 객체 }
-- [ ] AC-10 만족 (완료 토글)
+- [x] PATCH /api/todos/:id/status 엔드포인트 작성 (authMiddleware 장식)
+- [x] 요청 body: { status } (pending|completed)
+- [x] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
+- [x] updated_at 자동 갱신
+- [x] 성공 응답: 200, { 수정된 할일 객체 }
+- [x] AC-10 만족 (완료 토글)
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-05, BE-08
@@ -383,12 +383,12 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] DELETE /api/todos/:id 엔드포인트 작성 (authMiddleware 장식)
-- [ ] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
-- [ ] CASCADE DELETE 확인 (DB 제약)
-- [ ] 성공 응답: 204 (No Content)
-- [ ] 할일 없음: 404, { error: "Todo not found" }
-- [ ] AC-09 만족 (삭제 확인 후 영구 삭제)
+- [x] DELETE /api/todos/:id 엔드포인트 작성 (authMiddleware 장식)
+- [x] 소유권 검증: WHERE todo_id = $1 AND user_id = $2
+- [x] CASCADE DELETE 확인 (DB 제약)
+- [x] 성공 응답: 204 (No Content)
+- [x] 할일 없음: 404, { error: "Todo not found" }
+- [x] AC-09 만족 (삭제 확인 후 영구 삭제)
 
 **의존성**:
 - 선행 필요: BE-01, BE-02, BE-05, BE-08

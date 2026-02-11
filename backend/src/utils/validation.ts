@@ -79,3 +79,21 @@ export function validateCreateTodo(
 
   return errors;
 }
+
+export function validateUpdateTodo(
+  title: unknown,
+  due_date: unknown,
+  description?: unknown,
+  status?: unknown
+): ValidationError[] {
+  const errors = validateCreateTodo(title, due_date, description);
+
+  if (status !== undefined && status !== 'pending' && status !== 'completed') {
+    errors.push({
+      field: 'status',
+      message: "status는 'pending' 또는 'completed'이어야 합니다.",
+    });
+  }
+
+  return errors;
+}
