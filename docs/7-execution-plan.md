@@ -37,10 +37,10 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] PostgreSQL 17 설치 및 실행 확인
-- [ ] `my_todolist` DB 생성 확인
-- [ ] `.env` 파일에 `DB_URL` 환경변수 설정 (postgresql://user:password@localhost:5432/my_todolist)
-- [ ] `pg` CLI에서 연결 테스트 성공
+- [x] PostgreSQL 17 설치 및 실행 확인
+- [x] `my_todolist` DB 생성 확인
+- [x] `.env` 파일에 `DB_URL` 환경변수 설정 (postgresql://user:password@localhost:5432/my_todolist)
+- [x] `pg` CLI에서 연결 테스트 성공
 
 **의존성**:
 - 선행 필요: 없음
@@ -57,12 +57,12 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] `database/schema.sql` 파일 생성 완료 (users, todos 테이블 + 인덱스 + 제약사항)
-- [ ] DB 접속 후 `\dt` 명령으로 테이블 확인 가능
-- [ ] users 테이블: user_id(UUID PK), email(UNIQUE), password_hash, name, created_at, updated_at 컬럼 확인
-- [ ] todos 테이블: todo_id(UUID PK), user_id(FK CASCADE), title, description, due_date, status, created_at, updated_at 컬럼 확인
-- [ ] uuid-ossp 확장 활성화 확인
-- [ ] 인덱스 생성 확인 (users.email, todos.user_id, todos.status, todos.due_date)
+- [x] `database/schema.sql` 파일 생성 완료 (users, todos 테이블 + 인덱스 + 제약사항)
+- [x] DB 접속 후 `\dt` 명령으로 테이블 확인 가능
+- [x] users 테이블: user_id(UUID PK), email(UNIQUE), password_hash, name, created_at, updated_at 컬럼 확인
+- [x] todos 테이블: todo_id(UUID PK), user_id(FK CASCADE), title, description, due_date, status, created_at, updated_at 컬럼 확인
+- [x] uuid-ossp 확장 활성화 확인 (pgcrypto 사용, gen_random_uuid() 동일 지원)
+- [x] 인덱스 생성 확인 (users.email, todos.user_id, todos.status, todos.due_date)
 
 **의존성**:
 - 선행 필요: DB-01
@@ -79,11 +79,11 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] `database/seed.sql` 파일 생성 (최소 2명 사용자, 각 사용자당 5~10개 할일)
-- [ ] 할일 상태 다양화 (pending, completed)
-- [ ] 기한 다양화 (과거, 오늘, 미래)
-- [ ] seed.sql 실행 후 SELECT 쿼리로 데이터 확인
-- [ ] 최소 2명의 테스트 사용자 데이터 존재 확인
+- [x] `database/seed.sql` 파일 생성 (최소 2명 사용자, 각 사용자당 5~10개 할일)
+- [x] 할일 상태 다양화 (pending, completed)
+- [x] 기한 다양화 (과거, 오늘, 미래)
+- [x] seed.sql 실행 후 SELECT 쿼리로 데이터 확인
+- [x] 최소 2명의 테스트 사용자 데이터 존재 확인
 
 **의존성**:
 - 선행 필요: DB-02
