@@ -405,12 +405,12 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] `src/middlewares/errorHandler.ts` 작성
-- [ ] 에러 응답 형식: { error, message, status }
-- [ ] 404 핸들러 (존재하지 않는 라우트)
-- [ ] 500 핸들러 (예상하지 못한 에러)
-- [ ] DB 에러 처리 (쿼리 실패, 제약 위반)
-- [ ] 모든 라우트에 적용
+- [x] `src/middlewares/errorHandler.ts` 작성
+- [x] 에러 응답 형식: { error, message, status }
+- [x] 404 핸들러 (존재하지 않는 라우트)
+- [x] 500 핸들러 (예상하지 못한 에러)
+- [x] DB 에러 처리 (쿼리 실패, 제약 위반)
+- [x] 모든 라우트에 적용
 
 **의존성**:
 - 선행 필요: BE-01, BE-02
@@ -427,12 +427,12 @@
 **담당**: Backend
 
 **완료 조건**:
-- [ ] `src/config/cors.ts` 작성
-- [ ] 허용 origin: http://localhost:5173 (Vite 개발 서버)
-- [ ] 허용 메서드: GET, POST, PUT, PATCH, DELETE, OPTIONS
-- [ ] 허용 헤더: Content-Type, Authorization
-- [ ] 인증 정보 포함: credentials: true
-- [ ] Express 앱에 적용
+- [x] `src/config/cors.ts` 작성
+- [x] 허용 origin: http://localhost:5173 (Vite 개발 서버)
+- [x] 허용 메서드: GET, POST, PUT, PATCH, DELETE, OPTIONS
+- [x] 허용 헤더: Content-Type, Authorization
+- [x] 인증 정보 포함: credentials: true
+- [x] Express 앱에 적용
 
 **의존성**:
 - 선행 필요: BE-01
