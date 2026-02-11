@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <filter id="card-shadow" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="8" flood-color="#3C4043" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Page Background -->
+  <rect width="1280" height="720" fill="#F8F9FA"/>
+
+  <!-- ── Header ── -->
+  <rect width="1280" height="72" fill="#FFFFFF"/>
+  <line x1="0" y1="72" x2="1280" y2="72" stroke="#DADCE0" stroke-width="1"/>
+
+  <!-- Header: Logo mark -->
+  <rect x="604" y="18" width="6" height="36" rx="3" fill="#F4511E"/>
+  <rect x="614" y="18" width="6" height="36" rx="3" fill="#F4511E" opacity="0.6"/>
+
+  <!-- Header: Title -->
+  <text x="630" y="44"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="22" font-weight="500" fill="#3C4043">my_todolist</text>
+
+  <!-- Header: Subtitle -->
+  <text x="640" y="64" text-anchor="middle"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="12" fill="#70757A">Team CalTalk | 학생 일정 관리</text>
+
+  <!-- ── Card ── -->
+  <rect x="440" y="100" width="400" height="548" rx="12"
+        fill="#FFFFFF" filter="url(#card-shadow)"/>
+
+  <!-- Card top accent bar -->
+  <rect x="440" y="100" width="400" height="4" rx="2" fill="#F4511E"/>
+  <rect x="440" y="100" width="400" height="4" rx="2" fill="none"
+        stroke="#F4511E" stroke-width="0"/>
+
+  <!-- ── Card Title ── -->
+  <text x="640" y="158" text-anchor="middle"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="20" font-weight="500" fill="#3C4043">회원가입</text>
+
+  <!-- Title underline accent -->
+  <line x1="610" y1="166" x2="670" y2="166" stroke="#F4511E" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- ── 이름 ── -->
+  <text x="480" y="202"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="12" font-weight="500" fill="#3C4043">이름</text>
+  <!-- required dot -->
+  <circle cx="497" cy="198" r="2.5" fill="#F4511E"/>
+
+  <rect x="480" y="210" width="320" height="44" rx="4"
+        fill="#F8F9FA" stroke="#DADCE0" stroke-width="1.5"/>
+  <!-- placeholder icon area -->
+  <text x="496" y="237"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="14" fill="#BDBDBD">홍길동</text>
+
+  <!-- ── 이메일 ── -->
+  <text x="480" y="275"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="12" font-weight="500" fill="#3C4043">이메일</text>
+  <circle cx="501" cy="271" r="2.5" fill="#F4511E"/>
+
+  <rect x="480" y="283" width="320" height="44" rx="4"
+        fill="#F8F9FA" stroke="#DADCE0" stroke-width="1.5"/>
+  <text x="496" y="310"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="14" fill="#BDBDBD">example@email.com</text>
+
+  <!-- ── 비밀번호 ── -->
+  <text x="480" y="348"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="12" font-weight="500" fill="#3C4043">비밀번호</text>
+  <circle cx="509" cy="344" r="2.5" fill="#F4511E"/>
+
+  <rect x="480" y="356" width="320" height="44" rx="4"
+        fill="#F8F9FA" stroke="#DADCE0" stroke-width="1.5"/>
+  <text x="496" y="383"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="16" fill="#3C4043" letter-spacing="3">••••••••</text>
+
+  <!-- Password hint chip -->
+  <rect x="480" y="406" width="175" height="20" rx="10"
+        fill="#FBE9E7"/>
+  <text x="568" y="420" text-anchor="middle"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="11" fill="#F4511E">영문+숫자 혼용 8자 이상</text>
+
+  <!-- ── 비밀번호 확인 ── -->
+  <text x="480" y="447"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="12" font-weight="500" fill="#3C4043">비밀번호 확인</text>
+  <circle cx="525" cy="443" r="2.5" fill="#F4511E"/>
+
+  <rect x="480" y="455" width="320" height="44" rx="4"
+        fill="#F8F9FA" stroke="#DADCE0" stroke-width="1.5"/>
+  <text x="496" y="482"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="16" fill="#3C4043" letter-spacing="3">••••••••</text>
+
+  <!-- ── 가입하기 Button ── -->
+  <rect x="480" y="516" width="320" height="44" rx="8" fill="#F4511E"/>
+  <!-- button subtle gradient overlay -->
+  <rect x="480" y="516" width="320" height="22" rx="8" fill="white" opacity="0.06"/>
+  <text x="640" y="543" text-anchor="middle"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="14" font-weight="500" fill="#FFFFFF" letter-spacing="0.25">가입하기</text>
+
+  <!-- ── Divider ── -->
+  <line x1="480" y1="582" x2="800" y2="582" stroke="#DADCE0" stroke-width="1"/>
+  <!-- Divider center badge -->
+  <rect x="622" y="574" width="36" height="16" rx="8" fill="#FFFFFF" stroke="#DADCE0" stroke-width="1"/>
+  <text x="640" y="586" text-anchor="middle"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="10" fill="#70757A">또는</text>
+
+  <!-- ── Footer Link ── -->
+  <text x="640" y="618" text-anchor="middle"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="13">
+    <tspan fill="#70757A">이미 계정이 있으신가요?  </tspan><tspan fill="#F4511E" text-decoration="underline" font-weight="500">로그인</tspan>
+  </text>
+
+  <!-- ── Required field legend ── -->
+  <circle cx="444" cy="652" r="2.5" fill="#F4511E"/>
+  <text x="450" y="656"
+        font-family="'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="11" fill="#70757A"> 필수 입력 항목</text>
+</svg>

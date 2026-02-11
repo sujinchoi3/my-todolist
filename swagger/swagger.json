@@ -1,0 +1,1140 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "my_todolist API",
+    "description": "Team CalTalk의 학생 일정 관리 할일 앱 API 명세서.\n\n## 인증 방식\n- **Access Token**: JWT, 만료 15분. `Authorization: Bearer {token}` 헤더로 전송.\n- **Refresh Token**: JWT, 만료 7일. `HttpOnly Cookie (refreshToken)`에 저장되며 자동으로 전송됨.\n\n## 에러 응답 형식\n모든 에러 응답은 아래 구조를 따릅니다:\n```json\n{\n  \"status\": \"error\",\n  \"code\": \"ERROR_CODE\",\n  \"message\": \"사용자에게 표시할 메시지\"\n}\n```\n\n## 기한 초과 (is_overdue) 계산\n`is_overdue` 필드는 DB에 저장되지 않으며, 서버가 KST(UTC+9) 기준 오늘 날짜와 `due_date`를 비교해 런타임에 계산합니다.\n조건: `status = 'pending'` AND `due_date < 오늘(KST)`",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Team CalTalk"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "로컬 개발 서버"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "회원가입, 로그인, 로그아웃, 토큰 갱신 등 인증 관련 API"
+    },
+    {
+      "name": "Todos",
+      "description": "할일 생성, 조회, 수정, 삭제 등 할일 관리 API (모든 엔드포인트에 Bearer 인증 필요)"
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/api/auth/signup": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "회원가입",
+        "description": "새로운 사용자 계정을 생성합니다. 이메일은 전체 서비스에서 유일해야 합니다. 비밀번호는 서버에서 bcrypt(cost 12)로 해싱되어 저장됩니다.",
+        "operationId": "signup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupRequest"
+              },
+              "example": {
+                "email": "jisu@university.ac.kr",
+                "password": "pass1234",
+                "name": "김지수"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "회원가입 성공. 생성된 사용자 기본 정보를 반환합니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignupResponse"
+                },
+                "example": {
+                  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                  "email": "jisu@university.ac.kr",
+                  "name": "김지수"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "요청 유효성 검증 실패 또는 이메일 중복",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "emailAlreadyExists": {
+                    "summary": "이메일 중복",
+                    "value": {
+                      "status": "error",
+                      "code": "EMAIL_ALREADY_EXISTS",
+                      "message": "이미 사용 중인 이메일입니다."
+                    }
+                  },
+                  "validationError": {
+                    "summary": "유효성 검증 실패",
+                    "value": {
+                      "status": "error",
+                      "code": "VALIDATION_ERROR",
+                      "message": "입력값이 올바르지 않습니다.",
+                      "details": [
+                        {
+                          "field": "password",
+                          "message": "비밀번호는 최소 8자이며 영문과 숫자를 혼용해야 합니다."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "로그인 (JWT 발급)",
+        "description": "이메일과 비밀번호로 인증하고 Access Token(JSON 응답)과 Refresh Token(HttpOnly Cookie)을 발급합니다.\n\n- **Access Token**: 응답 바디에 포함. 클라이언트 메모리에 저장하고 API 요청 시 `Authorization` 헤더에 담아 전송합니다.\n- **Refresh Token**: `Set-Cookie` 헤더로 `HttpOnly; Secure; SameSite=Strict` 속성의 쿠키로 설정됩니다.",
+        "operationId": "login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "example": {
+                "email": "jisu@university.ac.kr",
+                "password": "pass1234"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "로그인 성공. Access Token과 사용자 정보를 반환합니다. Refresh Token은 HttpOnly Cookie로 설정됩니다.",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Refresh Token을 HttpOnly 쿠키로 설정합니다. `refreshToken={jwt}; HttpOnly; Secure; SameSite=Strict; Max-Age=604800`",
+                "schema": {
+                  "type": "string",
+                  "example": "refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict; Max-Age=604800; Path=/"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "example": {
+                  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTUwZTg0MDAtZTI5Yi00MWQ0LWE3MTYtNDQ2NjU1NDQwMDAwIiwiZW1haWwiOiJqaXN1QHVuaXZlcnNpdHkuYWMua3IiLCJpYXQiOjE3MzkxNjgwMDAsImV4cCI6MTczOTE2ODkwMH0.signature",
+                  "user": {
+                    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                    "email": "jisu@university.ac.kr",
+                    "name": "김지수"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "이메일 또는 비밀번호 불일치",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "code": "INVALID_CREDENTIALS",
+                  "message": "이메일 또는 비밀번호가 올바르지 않습니다."
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "로그아웃",
+        "description": "서버 측 Refresh Token 쿠키를 무효화합니다. 클라이언트는 이 응답을 받은 뒤 메모리에 보관 중인 Access Token도 직접 삭제해야 합니다.\n\n인증이 필요한 엔드포인트입니다. (Bearer Token)",
+        "operationId": "logout",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "로그아웃 성공. Refresh Token 쿠키가 삭제됩니다.",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Refresh Token 쿠키를 만료시킵니다.",
+                "schema": {
+                  "type": "string",
+                  "example": "refreshToken=; Max-Age=0; Path=/"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Logged out"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "Logged out"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Access Token 갱신",
+        "description": "HttpOnly Cookie에 저장된 Refresh Token을 사용해 새로운 Access Token을 발급합니다. 요청 시 브라우저가 자동으로 `refreshToken` 쿠키를 전송해야 하므로 클라이언트에서 `credentials: 'include'` 설정이 필요합니다.",
+        "operationId": "refreshToken",
+        "parameters": [
+          {
+            "name": "refreshToken",
+            "in": "cookie",
+            "required": true,
+            "description": "HttpOnly 쿠키로 저장된 Refresh Token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access Token 갱신 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                },
+                "example": {
+                  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTUwZTg0MDAtZTI5Yi00MWQ0LWE3MTYtNDQ2NjU1NDQwMDAwIiwiZW1haWwiOiJqaXN1QHVuaXZlcnNpdHkuYWMua3IiLCJpYXQiOjE3MzkxNjgwMDAsImV4cCI6MTczOTE2ODkwMH0.new_signature"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Refresh Token 만료 또는 무효",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "code": "REFRESH_TOKEN_EXPIRED",
+                  "message": "세션이 만료되었습니다. 다시 로그인해 주세요."
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/todos": {
+      "get": {
+        "tags": ["Todos"],
+        "summary": "할일 목록 조회",
+        "description": "로그인한 사용자의 할일 목록을 조회합니다. 응답은 `overdue`(기한 초과) 그룹과 `normal`(일반) 그룹으로 분리되며, `overdue` 그룹이 우선 반환됩니다.\n\n`is_overdue`는 서버에서 KST 기준으로 런타임 계산됩니다: `status = 'pending'` AND `오늘(KST) > due_date`",
+        "operationId": "getTodos",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "할일 상태 필터. 미지정 시 전체 조회.",
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "completed"]
+            },
+            "example": "pending"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "정렬 기준. 미지정 시 기본값은 `due_date_asc`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "due_date_asc",
+                "due_date_desc",
+                "created_at_asc",
+                "created_at_desc"
+              ],
+              "default": "due_date_asc"
+            },
+            "example": "due_date_asc"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "키워드 검색. `title` 및 `description` 필드에 대한 부분 일치(ILIKE) 검색.",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "example": "데이터베이스"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "할일 목록 조회 성공. `overdue`는 기한 초과 항목, `normal`은 일반 항목 배열입니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodoListResponse"
+                },
+                "example": {
+                  "overdue": [
+                    {
+                      "todo_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                      "title": "데이터베이스 과제 제출",
+                      "description": "ERD 작성 및 SQL 쿼리 제출",
+                      "due_date": "2026-02-09",
+                      "status": "pending",
+                      "is_overdue": true,
+                      "created_at": "2026-02-07T10:00:00.000Z",
+                      "updated_at": "2026-02-07T10:00:00.000Z"
+                    }
+                  ],
+                  "normal": [
+                    {
+                      "todo_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                      "title": "운영체제 3장 요약 제출",
+                      "description": null,
+                      "due_date": "2026-02-14",
+                      "status": "pending",
+                      "is_overdue": false,
+                      "created_at": "2026-02-11T09:30:00.000Z",
+                      "updated_at": "2026-02-11T09:30:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Todos"],
+        "summary": "할일 생성",
+        "description": "새로운 할일을 생성합니다. `user_id`는 인증 토큰에서 자동으로 추출되므로 요청 바디에 포함하지 않습니다. `status`는 기본값 `pending`으로 설정됩니다.",
+        "operationId": "createTodo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTodoRequest"
+              },
+              "example": {
+                "title": "운영체제 3장 요약 제출",
+                "description": "교수님 강의자료 참고하여 A4 2장 분량으로 작성",
+                "due_date": "2026-02-14"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "할일 생성 성공. 생성된 할일 객체 전체를 반환합니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todo"
+                },
+                "example": {
+                  "todo_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                  "title": "운영체제 3장 요약 제출",
+                  "description": "교수님 강의자료 참고하여 A4 2장 분량으로 작성",
+                  "due_date": "2026-02-14",
+                  "status": "pending",
+                  "is_overdue": false,
+                  "created_at": "2026-02-11T09:30:00.000Z",
+                  "updated_at": "2026-02-11T09:30:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "요청 유효성 검증 실패",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "code": "VALIDATION_ERROR",
+                  "message": "입력값이 올바르지 않습니다.",
+                  "details": [
+                    {
+                      "field": "title",
+                      "message": "제목은 필수 입력 항목입니다."
+                    },
+                    {
+                      "field": "due_date",
+                      "message": "마감일은 YYYY-MM-DD 형식이어야 합니다."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/todos/{id}": {
+      "get": {
+        "tags": ["Todos"],
+        "summary": "할일 단건 조회",
+        "description": "특정 할일을 ID로 조회합니다. 요청한 사용자 본인의 할일만 조회할 수 있습니다. `is_overdue` 필드가 포함된 전체 객체를 반환합니다.",
+        "operationId": "getTodoById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TodoId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "할일 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todo"
+                },
+                "example": {
+                  "todo_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                  "title": "운영체제 3장 요약 제출",
+                  "description": "교수님 강의자료 참고하여 A4 2장 분량으로 작성",
+                  "due_date": "2026-02-14",
+                  "status": "pending",
+                  "is_overdue": false,
+                  "created_at": "2026-02-11T09:30:00.000Z",
+                  "updated_at": "2026-02-11T09:30:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TodoNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Todos"],
+        "summary": "할일 수정 (전체 필드)",
+        "description": "할일의 전체 필드를 수정합니다. `title`과 `due_date`는 필수입니다. `description`은 선택 사항이며 `null`을 전송하면 기존 설명이 삭제됩니다. 요청한 사용자 본인의 할일만 수정할 수 있습니다.",
+        "operationId": "updateTodo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TodoId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTodoRequest"
+              },
+              "example": {
+                "title": "운영체제 3장 요약 제출 (수정)",
+                "description": "강의자료 3-1절~3-4절 범위로 한정",
+                "due_date": "2026-02-13",
+                "status": "pending"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "할일 수정 성공. 수정된 할일 객체 전체를 반환합니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todo"
+                },
+                "example": {
+                  "todo_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                  "title": "운영체제 3장 요약 제출 (수정)",
+                  "description": "강의자료 3-1절~3-4절 범위로 한정",
+                  "due_date": "2026-02-13",
+                  "status": "pending",
+                  "is_overdue": false,
+                  "created_at": "2026-02-11T09:30:00.000Z",
+                  "updated_at": "2026-02-11T14:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "요청 유효성 검증 실패",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "code": "VALIDATION_ERROR",
+                  "message": "입력값이 올바르지 않습니다.",
+                  "details": [
+                    {
+                      "field": "title",
+                      "message": "제목은 1자 이상 255자 이하이어야 합니다."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TodoNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Todos"],
+        "summary": "할일 삭제",
+        "description": "할일을 영구적으로 삭제합니다. 삭제 후 복구가 불가능합니다. 요청한 사용자 본인의 할일만 삭제할 수 있습니다.",
+        "operationId": "deleteTodo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TodoId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "할일 삭제 성공. 응답 바디 없음."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TodoNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/todos/{id}/status": {
+      "patch": {
+        "tags": ["Todos"],
+        "summary": "할일 상태 변경",
+        "description": "`status` 필드만 변경합니다. `pending`과 `completed` 사이의 양방향 전환이 가능합니다. 상태 변경 시 `updated_at`이 자동으로 갱신됩니다. 요청한 사용자 본인의 할일만 변경할 수 있습니다.",
+        "operationId": "updateTodoStatus",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TodoId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTodoStatusRequest"
+              },
+              "example": {
+                "status": "completed"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "상태 변경 성공. 수정된 할일 객체 전체를 반환합니다.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todo"
+                },
+                "example": {
+                  "todo_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                  "title": "운영체제 3장 요약 제출",
+                  "description": "교수님 강의자료 참고하여 A4 2장 분량으로 작성",
+                  "due_date": "2026-02-14",
+                  "status": "completed",
+                  "is_overdue": false,
+                  "created_at": "2026-02-11T09:30:00.000Z",
+                  "updated_at": "2026-02-11T15:30:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 status 값",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "error",
+                  "code": "INVALID_STATUS",
+                  "message": "status는 'pending' 또는 'completed'이어야 합니다."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TodoNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Access Token. 로그인(`POST /api/auth/login`) 또는 토큰 갱신(`POST /api/auth/refresh`) 응답에서 발급된 `access_token` 값을 사용합니다. 만료 시간은 15분입니다."
+      }
+    },
+    "parameters": {
+      "TodoId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "할일의 고유 식별자 (UUID v4)",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "example": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "description": "사용자 공개 정보 (password_hash 제외)",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "사용자 고유 식별자 (UUID v4)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255,
+            "description": "사용자 이메일 주소 (RFC 5322 형식, 유일값)",
+            "example": "jisu@university.ac.kr"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "사용자 이름",
+            "example": "김지수"
+          }
+        },
+        "required": ["user_id", "email", "name"]
+      },
+      "Todo": {
+        "type": "object",
+        "description": "할일 객체. `is_overdue`는 DB에 저장되지 않으며 서버가 응답 시 KST 기준으로 계산합니다.",
+        "properties": {
+          "todo_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "할일 고유 식별자 (UUID v4)",
+            "example": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "소유자 사용자 ID (FK → users.user_id)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "할일 제목",
+            "example": "운영체제 3장 요약 제출"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "nullable": true,
+            "description": "할일 상세 설명 (선택 사항, 최대 1000자)",
+            "example": "교수님 강의자료 참고하여 A4 2장 분량으로 작성"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "마감일 (YYYY-MM-DD 형식)",
+            "example": "2026-02-14"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed"],
+            "description": "할일 상태. `pending`(미완료) 또는 `completed`(완료)",
+            "example": "pending"
+          },
+          "is_overdue": {
+            "type": "boolean",
+            "description": "기한 초과 여부. 서버에서 KST 기준으로 런타임 계산: `status = 'pending'` AND `오늘(KST) > due_date`. DB에 저장되지 않음.",
+            "example": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "할일 생성 일시 (ISO 8601)",
+            "example": "2026-02-11T09:30:00.000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "할일 최종 수정 일시 (ISO 8601)",
+            "example": "2026-02-11T09:30:00.000Z"
+          }
+        },
+        "required": [
+          "todo_id",
+          "user_id",
+          "title",
+          "due_date",
+          "status",
+          "is_overdue",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "TodoListResponse": {
+        "type": "object",
+        "description": "할일 목록 조회 응답. 기한 초과 항목과 일반 항목을 분리하여 반환합니다.",
+        "properties": {
+          "overdue": {
+            "type": "array",
+            "description": "`is_overdue = true`인 할일 목록 (기한 초과 항목). 화면 최상단에 별도 그룹으로 표시됩니다.",
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            }
+          },
+          "normal": {
+            "type": "array",
+            "description": "`is_overdue = false`인 할일 목록 (일반 항목)",
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            }
+          }
+        },
+        "required": ["overdue", "normal"]
+      },
+      "SignupRequest": {
+        "type": "object",
+        "description": "회원가입 요청 바디",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255,
+            "description": "이메일 주소 (RFC 5322 형식, 최대 255자)",
+            "example": "jisu@university.ac.kr"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "description": "비밀번호 (최소 8자, 영문과 숫자 혼용 필수)",
+            "example": "pass1234"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "사용자 이름 (1자 이상 100자 이하)",
+            "example": "김지수"
+          }
+        },
+        "required": ["email", "password", "name"]
+      },
+      "SignupResponse": {
+        "type": "object",
+        "description": "회원가입 성공 응답",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "생성된 사용자 ID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "사용자 이메일",
+            "example": "jisu@university.ac.kr"
+          },
+          "name": {
+            "type": "string",
+            "description": "사용자 이름",
+            "example": "김지수"
+          }
+        },
+        "required": ["user_id", "email", "name"]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "description": "로그인 요청 바디",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "등록된 이메일 주소",
+            "example": "jisu@university.ac.kr"
+          },
+          "password": {
+            "type": "string",
+            "description": "계정 비밀번호",
+            "example": "pass1234"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "description": "로그인 성공 응답. Refresh Token은 응답 바디 대신 `Set-Cookie` 헤더로 HttpOnly 쿠키에 설정됩니다.",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT Access Token (만료 15분). 이후 보호된 API 호출 시 `Authorization: Bearer {token}` 헤더에 포함합니다.",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTUwZTg0MDAtZTI5Yi00MWQ0LWE3MTYtNDQ2NjU1NDQwMDAwIiwiZW1haWwiOiJqaXN1QHVuaXZlcnNpdHkuYWMua3IiLCJpYXQiOjE3MzkxNjgwMDAsImV4cCI6MTczOTE2ODkwMH0.signature"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": ["access_token", "user"]
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "description": "Access Token 갱신 성공 응답",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "새로 발급된 JWT Access Token (만료 15분)",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTUwZTg0MDAtZTI5Yi00MWQ0LWE3MTYtNDQ2NjU1NDQwMDAwIiwiZW1haWwiOiJqaXN1QHVuaXZlcnNpdHkuYWMua3IiLCJpYXQiOjE3MzkxNjgwMDAsImV4cCI6MTczOTE2ODkwMH0.new_signature"
+          }
+        },
+        "required": ["access_token"]
+      },
+      "CreateTodoRequest": {
+        "type": "object",
+        "description": "할일 생성 요청 바디",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "할일 제목 (필수, 1자 이상 255자 이하)",
+            "example": "운영체제 3장 요약 제출"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "nullable": true,
+            "description": "할일 상세 설명 (선택 사항, 최대 1000자)",
+            "example": "교수님 강의자료 참고하여 A4 2장 분량으로 작성"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "마감일 (필수, YYYY-MM-DD 형식)",
+            "example": "2026-02-14"
+          }
+        },
+        "required": ["title", "due_date"]
+      },
+      "UpdateTodoRequest": {
+        "type": "object",
+        "description": "할일 전체 수정 요청 바디 (PUT). `title`과 `due_date`는 필수입니다.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "할일 제목 (1자 이상 255자 이하)",
+            "example": "운영체제 3장 요약 제출 (수정)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "nullable": true,
+            "description": "할일 상세 설명 (최대 1000자, null 전송 시 기존 설명 삭제)",
+            "example": "강의자료 3-1절~3-4절 범위로 한정"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "마감일 (YYYY-MM-DD 형식)",
+            "example": "2026-02-13"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed"],
+            "description": "할일 상태",
+            "example": "pending"
+          }
+        },
+        "required": ["title", "due_date"]
+      },
+      "UpdateTodoStatusRequest": {
+        "type": "object",
+        "description": "할일 상태만 변경하는 요청 바디 (PATCH)",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed"],
+            "description": "변경할 상태값. `pending`(미완료) 또는 `completed`(완료).",
+            "example": "completed"
+          }
+        },
+        "required": ["status"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "표준 에러 응답 형식",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["error"],
+            "description": "응답 상태 표시자",
+            "example": "error"
+          },
+          "code": {
+            "type": "string",
+            "description": "에러 식별 코드",
+            "example": "UNAUTHORIZED",
+            "enum": [
+              "UNAUTHORIZED",
+              "REFRESH_TOKEN_EXPIRED",
+              "FORBIDDEN",
+              "TODO_NOT_FOUND",
+              "EMAIL_ALREADY_EXISTS",
+              "INVALID_CREDENTIALS",
+              "VALIDATION_ERROR",
+              "INVALID_STATUS",
+              "INTERNAL_SERVER_ERROR"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "사용자에게 표시할 에러 메시지 (한국어)",
+            "example": "로그인이 필요합니다."
+          },
+          "details": {
+            "type": "array",
+            "description": "유효성 검증 실패 시 필드별 상세 오류 목록 (VALIDATION_ERROR 코드에서만 사용)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "오류가 발생한 필드명",
+                  "example": "title"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "해당 필드의 오류 메시지",
+                  "example": "제목은 필수 입력 항목입니다."
+                }
+              }
+            }
+          }
+        },
+        "required": ["status", "code", "message"]
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "인증 실패. Access Token이 없거나 만료 또는 유효하지 않습니다.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "code": "UNAUTHORIZED",
+              "message": "로그인이 필요합니다."
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "인가 실패. 본인 소유가 아닌 할일에 접근을 시도했습니다.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "code": "FORBIDDEN",
+              "message": "접근 권한이 없습니다."
+            }
+          }
+        }
+      },
+      "TodoNotFound": {
+        "description": "할일을 찾을 수 없습니다.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "code": "TODO_NOT_FOUND",
+              "message": "해당 할일을 찾을 수 없습니다."
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "서버 내부 오류",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "code": "INTERNAL_SERVER_ERROR",
+              "message": "서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+            }
+          }
+        }
+      }
+    }
+  }
+}
