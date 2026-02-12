@@ -1,24 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useI18n } from '../contexts/I18nContext'
 import { ApiRequestError } from '../api/client'
 import styles from './LoginPage.module.css'
 
-function validateEmail(email: string): string {
-  if (!email) return '이메일을 입력해주세요.'
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return '올바른 이메일 형식이 아닙니다.'
-  return ''
-}
-
-function validatePassword(password: string): string {
-  if (!password) return '비밀번호를 입력해주세요.'
-  if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password))
-    return '비밀번호는 영문+숫자 혼용 8자 이상이어야 합니다.'
-  return ''
-}
-
 export default function SignupPage() {
   const { signup, login } = useAuth()
+  const { t, locale, setLocale } = useI18n()
   const navigate = useNavigate()
 
   const [name, setName] = useState('')
@@ -33,13 +22,25 @@ export default function SignupPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  function validateEmail(value: string): string {
+    if (!value) return t('emailRequired')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t('emailInvalid')
+    return ''
+  }
+
+  function validatePassword(value: string): string {
+    if (!value) return t('passwordRequired')
+    if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(value)) return t('passwordInvalid')
+    return ''
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    const nameErr = name.trim() ? '' : '이름을 입력해주세요.'
+    const nameErr = name.trim() ? '' : t('nameRequired')
     const emailErr = validateEmail(email)
     const passwordErr = validatePassword(password)
-    const confirmErr = password !== passwordConfirm ? '비밀번호가 일치하지 않습니다.' : ''
+    const confirmErr = password !== passwordConfirm ? t('passwordMismatch') : ''
 
     setNameError(nameErr)
     setEmailError(emailErr)
@@ -59,7 +60,7 @@ export default function SignupPage() {
       } else if (err instanceof ApiRequestError) {
         setEmailError(err.message)
       } else {
-        setEmailError('회원가입에 실패했습니다.')
+        setEmailError(t('signupFailed'))
       }
     } finally {
       setIsSubmitting(false)
@@ -69,18 +70,34 @@ export default function SignupPage() {
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
-        <h1 className={styles.headerTitle}>my_todolist</h1>
-        <p className={styles.headerSubtitle}>Team CalTalk | 학생 일정 관리</p>
+        <h1 className={styles.headerTitle}>{t('appTitle')}</h1>
+        <p className={styles.headerSubtitle}>{t('appSubtitle')}</p>
+        <div className={styles.langToggle}>
+          <button
+            type="button"
+            className={`${styles.langToggleBtn}${locale === 'ko' ? ` ${styles.langToggleBtnActive}` : ''}`}
+            onClick={() => setLocale('ko')}
+          >
+            KO
+          </button>
+          <button
+            type="button"
+            className={`${styles.langToggleBtn}${locale === 'en' ? ` ${styles.langToggleBtnActive}` : ''}`}
+            onClick={() => setLocale('en')}
+          >
+            EN
+          </button>
+        </div>
       </header>
 
       <main className={styles.content}>
         <div className={styles.card}>
-          <h2 className={styles.cardTitle}>회원가입</h2>
+          <h2 className={styles.cardTitle}>{t('signupTitle')}</h2>
 
           <form onSubmit={handleSubmit} noValidate>
             <div className={styles.fieldGroup}>
               <div className={styles.field}>
-                <label htmlFor="name" className={styles.label}>이름</label>
+                <label htmlFor="name" className={styles.label}>{t('nameLabel')}</label>
                 <input
                   id="name"
                   type="text"
@@ -90,7 +107,7 @@ export default function SignupPage() {
                     setName(e.target.value)
                     if (nameError && e.target.value.trim()) setNameError('')
                   }}
-                  placeholder="홍길동"
+                  placeholder={t('namePlaceholder')}
                   autoComplete="name"
                   disabled={isSubmitting}
                 />
@@ -98,7 +115,7 @@ export default function SignupPage() {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="email" className={styles.label}>이메일</label>
+                <label htmlFor="email" className={styles.label}>{t('emailLabel')}</label>
                 <input
                   id="email"
                   type="email"
@@ -117,7 +134,7 @@ export default function SignupPage() {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="password" className={styles.label}>비밀번호</label>
+                <label htmlFor="password" className={styles.label}>{t('passwordLabel')}</label>
                 <input
                   id="password"
                   type="password"
@@ -131,12 +148,12 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   disabled={isSubmitting}
                 />
-                <span className={styles.fieldHint}>영문+숫자 혼용 8자 이상</span>
+                <span className={styles.fieldHint}>{t('passwordHint')}</span>
                 {passwordError && <span className={styles.fieldError}>{passwordError}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="passwordConfirm" className={styles.label}>비밀번호 확인</label>
+                <label htmlFor="passwordConfirm" className={styles.label}>{t('passwordConfirmLabel')}</label>
                 <input
                   id="passwordConfirm"
                   type="password"
@@ -149,7 +166,7 @@ export default function SignupPage() {
                   }}
                   onBlur={() => {
                     if (passwordConfirm && passwordConfirm !== password)
-                      setPasswordConfirmError('비밀번호가 일치하지 않습니다.')
+                      setPasswordConfirmError(t('passwordMismatch'))
                   }}
                   autoComplete="new-password"
                   disabled={isSubmitting}
@@ -165,13 +182,13 @@ export default function SignupPage() {
               className={styles.submitButton}
               disabled={isSubmitting}
             >
-              {isSubmitting ? '처리 중...' : '가입하기'}
+              {isSubmitting ? t('signupLoading') : t('signupButton')}
             </button>
           </form>
 
           <p className={styles.footer}>
-            이미 계정이 있으신가요?
-            <Link to="/login">로그인</Link>
+            {t('hasAccount')}
+            <Link to="/login">{t('loginLink')}</Link>
           </p>
         </div>
       </main>

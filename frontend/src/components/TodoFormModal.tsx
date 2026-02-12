@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useI18n } from '../contexts/I18nContext'
 import styles from './TodoFormModal.module.css'
 
 interface FormValues {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function TodoFormModal({ isOpen, mode, initialValues, onSubmit, onCancel }: Props) {
+  const { t } = useI18n()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState('')
@@ -38,8 +40,8 @@ export default function TodoFormModal({ isOpen, mode, initialValues, onSubmit, o
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    const titleErr = title.trim() ? '' : '제목은 필수 입력 항목입니다.'
-    const dueDateErr = dueDate ? '' : '마감일은 필수 입력 항목입니다.'
+    const titleErr = title.trim() ? '' : t('titleRequired')
+    const dueDateErr = dueDate ? '' : t('dueDateRequired')
 
     setTitleError(titleErr)
     setDueDateError(dueDateErr)
@@ -66,12 +68,12 @@ export default function TodoFormModal({ isOpen, mode, initialValues, onSubmit, o
     >
       <div className={styles.modal} role="dialog" aria-modal="true">
         <div className={styles.header}>
-          <h2 className={styles.title}>{mode === 'create' ? '할일 추가' : '할일 수정'}</h2>
+          <h2 className={styles.title}>{mode === 'create' ? t('todoCreateTitle') : t('todoEditTitle')}</h2>
           <button
             type="button"
             className={styles.closeBtn}
             onClick={onCancel}
-            aria-label="닫기"
+            aria-label={t('closeAriaLabel')}
           >
             ✕
           </button>
@@ -80,7 +82,7 @@ export default function TodoFormModal({ isOpen, mode, initialValues, onSubmit, o
         <form onSubmit={handleSubmit} noValidate>
           <div className={styles.fieldGroup}>
             <div className={styles.field}>
-              <label htmlFor="todo-title" className={styles.label}>제목 *</label>
+              <label htmlFor="todo-title" className={styles.label}>{t('todoTitleLabel')}</label>
               <input
                 id="todo-title"
                 type="text"
@@ -97,7 +99,7 @@ export default function TodoFormModal({ isOpen, mode, initialValues, onSubmit, o
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="todo-description" className={styles.label}>설명 (선택)</label>
+              <label htmlFor="todo-description" className={styles.label}>{t('todoDescLabel')}</label>
               <textarea
                 id="todo-description"
                 className={styles.textarea}
@@ -110,7 +112,7 @@ export default function TodoFormModal({ isOpen, mode, initialValues, onSubmit, o
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="todo-due-date" className={styles.label}>마감일 *</label>
+              <label htmlFor="todo-due-date" className={styles.label}>{t('todoDueDateLabel')}</label>
               <input
                 id="todo-due-date"
                 type="date"
@@ -133,14 +135,14 @@ export default function TodoFormModal({ isOpen, mode, initialValues, onSubmit, o
               onClick={onCancel}
               disabled={isSubmitting}
             >
-              취소
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className={styles.submitBtn}
               disabled={isSubmitting}
             >
-              {isSubmitting ? '저장 중...' : '저장'}
+              {isSubmitting ? t('savingLabel') : t('save')}
             </button>
           </div>
         </form>

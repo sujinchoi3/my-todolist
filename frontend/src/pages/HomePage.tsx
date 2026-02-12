@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useI18n } from '../contexts/I18nContext'
 import { apiClient } from '../api/client'
 import TodoCard from '../components/TodoCard'
 import TodoFormModal from '../components/TodoFormModal'
@@ -14,6 +15,7 @@ type FilterOption = 'all' | 'pending' | 'completed'
 
 export default function HomePage() {
   const { user, logout } = useAuth()
+  const { t, locale, setLocale } = useI18n()
   const navigate = useNavigate()
 
   const [overdue, setOverdue] = useState<Todo[]>([])
@@ -61,13 +63,12 @@ export default function HomePage() {
     fetchTodos()
   }
 
-  // FE-09: 수정 버튼 클릭 시 GET /todos/:id로 최신 데이터 fetch
   async function handleEditOpen(id: string) {
     try {
       const todo = await apiClient.get<Todo>(`/todos/${id}`)
       setEditTodo(todo)
     } catch {
-      setApiError('할일 정보를 불러오지 못했습니다.')
+      setApiError(t('fetchTodoFailed'))
     }
   }
 
@@ -78,7 +79,6 @@ export default function HomePage() {
     fetchTodos()
   }
 
-  // FE-10: 옵티미스틱 업데이트 + 실패 시 롤백
   async function handleToggle(id: string) {
     const allTodos = [...overdue, ...normal]
     const todo = allTodos.find((t) => t.todo_id === id)
@@ -86,7 +86,6 @@ export default function HomePage() {
 
     const newStatus: TodoStatus = todo.status === 'pending' ? 'completed' : 'pending'
 
-    // 즉시 UI 업데이트 (옵티미스틱)
     const update = (list: Todo[]) =>
       list.map((t) => (t.todo_id === id ? { ...t, status: newStatus } : t))
     setOverdue((prev) => update(prev))
@@ -96,16 +95,14 @@ export default function HomePage() {
       await apiClient.patch(`/todos/${id}/status`, { status: newStatus })
       fetchTodos()
     } catch {
-      // 롤백
       const rollback = (list: Todo[]) =>
         list.map((t) => (t.todo_id === id ? { ...t, status: todo.status } : t))
       setOverdue((prev) => rollback(prev))
       setNormal((prev) => rollback(prev))
-      setApiError('상태 변경에 실패했습니다.')
+      setApiError(t('toggleFailed'))
     }
   }
 
-  // FE-11: 삭제 확인 후 DELETE
   async function handleDelete() {
     if (!deleteTodo) return
     await apiClient.delete(`/todos/${deleteTodo.todo_id}`)
@@ -118,15 +115,29 @@ export default function HomePage() {
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
-        <h1 className={styles.logo}>my_todolist</h1>
+        <h1 className={styles.logo}>{t('appTitle')}</h1>
         <div className={styles.headerRight}>
-          <span className={styles.greeting}>안녕하세요, {user?.name}님</span>
+          <span className={styles.greeting}>{t('greeting', { name: user?.name ?? '' })}</span>
+          <button
+            type="button"
+            className={`${styles.langToggleBtn}${locale === 'ko' ? ` ${styles.langToggleBtnActive}` : ''}`}
+            onClick={() => setLocale('ko')}
+          >
+            KO
+          </button>
+          <button
+            type="button"
+            className={`${styles.langToggleBtn}${locale === 'en' ? ` ${styles.langToggleBtnActive}` : ''}`}
+            onClick={() => setLocale('en')}
+          >
+            EN
+          </button>
           <button
             type="button"
             className={styles.logoutBtn}
             onClick={handleLogout}
           >
-            로그아웃
+            {t('logout')}
           </button>
         </div>
       </header>
@@ -144,7 +155,7 @@ export default function HomePage() {
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder="검색어 입력"
+                placeholder={t('searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -153,7 +164,7 @@ export default function HomePage() {
                   type="button"
                   className={styles.searchClear}
                   onClick={() => setSearch('')}
-                  aria-label="검색 초기화"
+                  aria-label={t('searchClear')}
                 >
                   ✕
                 </button>
@@ -164,12 +175,12 @@ export default function HomePage() {
               className={styles.sortSelect}
               value={sort}
               onChange={(e) => setSort(e.target.value as SortOption)}
-              aria-label="정렬 기준"
+              aria-label={t('sortLabel')}
             >
-              <option value="due_date_asc">마감일 오름차순</option>
-              <option value="due_date_desc">마감일 내림차순</option>
-              <option value="created_at_asc">등록일 오름차순</option>
-              <option value="created_at_desc">등록일 내림차순</option>
+              <option value="due_date_asc">{t('sortDueDateAsc')}</option>
+              <option value="due_date_desc">{t('sortDueDateDesc')}</option>
+              <option value="created_at_asc">{t('sortCreatedAsc')}</option>
+              <option value="created_at_desc">{t('sortCreatedDesc')}</option>
             </select>
           </div>
 
@@ -181,7 +192,7 @@ export default function HomePage() {
                 className={`${styles.filterTab}${filter === f ? ` ${styles.filterTabActive}` : ''}`}
                 onClick={() => setFilter(f)}
               >
-                {f === 'all' ? '전체' : f === 'pending' ? '미완료' : '완료'}
+                {f === 'all' ? t('filterAll') : f === 'pending' ? t('filterPending') : t('filterCompleted')}
               </button>
             ))}
           </div>
@@ -192,15 +203,15 @@ export default function HomePage() {
             <LoadingSpinner />
           ) : isEmpty ? (
             <div className={styles.emptyState}>
-              <p>할일이 없습니다.</p>
-              <p>아래 버튼으로 첫 할일을 추가해보세요!</p>
+              <p>{t('emptyTitle')}</p>
+              <p>{t('emptySubtitle')}</p>
             </div>
           ) : (
             <>
               {overdue.length > 0 && (
                 <section className={styles.group}>
                   <h2 className={styles.groupHeaderOverdue}>
-                    ⚠ 기한 초과 ({overdue.length}건)
+                    {t('overdueGroup', { n: overdue.length })}
                   </h2>
                   <div className={styles.todoList}>
                     {overdue.map((todo) => (
@@ -218,7 +229,7 @@ export default function HomePage() {
 
               {normal.length > 0 && (
                 <section className={styles.group}>
-                  <h2 className={styles.groupHeader}>할일 목록 ({normal.length}건)</h2>
+                  <h2 className={styles.groupHeader}>{t('normalGroup', { n: normal.length })}</h2>
                   <div className={styles.todoList}>
                     {normal.map((todo) => (
                       <TodoCard
@@ -242,7 +253,7 @@ export default function HomePage() {
             className={styles.addBtn}
             onClick={() => setCreateModalOpen(true)}
           >
-            + 할일 추가
+            {t('addTodo')}
           </button>
         </div>
       </main>

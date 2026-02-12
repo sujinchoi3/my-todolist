@@ -1,4 +1,5 @@
 import type { Todo } from '../types/api'
+import { useI18n } from '../contexts/I18nContext'
 import styles from './TodoCard.module.css'
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
 }
 
 export default function TodoCard({ todo, onToggle, onEdit, onDelete }: Props) {
+  const { t } = useI18n()
+
   const cardClass = [
     styles.card,
     todo.is_overdue ? styles.overdue : '',
@@ -25,7 +28,7 @@ export default function TodoCard({ todo, onToggle, onEdit, onDelete }: Props) {
           className={styles.checkbox}
           checked={todo.status === 'completed'}
           onChange={() => onToggle(todo.todo_id)}
-          aria-label={todo.status === 'completed' ? '완료 취소' : '완료 처리'}
+          aria-label={todo.status === 'completed' ? t('checkboxUndo') : t('checkboxComplete')}
         />
         <div className={styles.body}>
           <span className={styles.title}>{todo.title}</span>
@@ -40,7 +43,7 @@ export default function TodoCard({ todo, onToggle, onEdit, onDelete }: Props) {
               type="button"
               className={styles.actionBtn}
               onClick={() => onEdit(todo.todo_id)}
-              aria-label="수정"
+              aria-label={t('editAriaLabel')}
             >
               ✏
             </button>
@@ -48,7 +51,7 @@ export default function TodoCard({ todo, onToggle, onEdit, onDelete }: Props) {
               type="button"
               className={`${styles.actionBtn} ${styles.deleteBtn}`}
               onClick={() => onDelete(todo.todo_id)}
-              aria-label="삭제"
+              aria-label={t('deleteAriaLabel')}
             >
               🗑
             </button>

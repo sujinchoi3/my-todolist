@@ -1,17 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useI18n } from '../contexts/I18nContext'
 import { ApiRequestError } from '../api/client'
 import styles from './LoginPage.module.css'
 
-function validateEmail(email: string): string {
-  if (!email) return '이메일을 입력해주세요.'
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return '올바른 이메일 형식이 아닙니다.'
-  return ''
-}
-
 export default function LoginPage() {
   const { login } = useAuth()
+  const { t, locale, setLocale } = useI18n()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -19,6 +15,12 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState('')
   const [apiError, setApiError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  function validateEmail(value: string): string {
+    if (!value) return t('emailRequired')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t('emailInvalid')
+    return ''
+  }
 
   function handleEmailBlur() {
     setEmailError(validateEmail(email))
@@ -43,7 +45,7 @@ export default function LoginPage() {
       if (err instanceof ApiRequestError) {
         setApiError(err.message)
       } else {
-        setApiError('로그인에 실패했습니다.')
+        setApiError(t('loginFailed'))
       }
       setPassword('')
     } finally {
@@ -54,13 +56,29 @@ export default function LoginPage() {
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
-        <h1 className={styles.headerTitle}>my_todolist</h1>
-        <p className={styles.headerSubtitle}>Team CalTalk | 학생 일정 관리</p>
+        <h1 className={styles.headerTitle}>{t('appTitle')}</h1>
+        <p className={styles.headerSubtitle}>{t('appSubtitle')}</p>
+        <div className={styles.langToggle}>
+          <button
+            type="button"
+            className={`${styles.langToggleBtn}${locale === 'ko' ? ` ${styles.langToggleBtnActive}` : ''}`}
+            onClick={() => setLocale('ko')}
+          >
+            KO
+          </button>
+          <button
+            type="button"
+            className={`${styles.langToggleBtn}${locale === 'en' ? ` ${styles.langToggleBtnActive}` : ''}`}
+            onClick={() => setLocale('en')}
+          >
+            EN
+          </button>
+        </div>
       </header>
 
       <main className={styles.content}>
         <div className={styles.card}>
-          <h2 className={styles.cardTitle}>로그인</h2>
+          <h2 className={styles.cardTitle}>{t('loginTitle')}</h2>
 
           {apiError && (
             <div className={styles.errorBanner} role="alert">
@@ -71,7 +89,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} noValidate>
             <div className={styles.fieldGroup}>
               <div className={styles.field}>
-                <label htmlFor="email" className={styles.label}>이메일</label>
+                <label htmlFor="email" className={styles.label}>{t('emailLabel')}</label>
                 <input
                   id="email"
                   type="email"
@@ -90,7 +108,7 @@ export default function LoginPage() {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="password" className={styles.label}>비밀번호</label>
+                <label htmlFor="password" className={styles.label}>{t('passwordLabel')}</label>
                 <input
                   id="password"
                   type="password"
@@ -108,13 +126,13 @@ export default function LoginPage() {
               className={styles.submitButton}
               disabled={isSubmitting}
             >
-              {isSubmitting ? '로그인 중...' : '로그인'}
+              {isSubmitting ? t('loginLoading') : t('loginButton')}
             </button>
           </form>
 
           <p className={styles.footer}>
-            계정이 없으신가요?
-            <Link to="/signup">회원가입</Link>
+            {t('noAccount')}
+            <Link to="/signup">{t('signupLink')}</Link>
           </p>
         </div>
       </main>

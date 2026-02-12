@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useI18n } from '../contexts/I18nContext'
 import styles from './TodoFormModal.module.css'
 import dialogStyles from './DeleteConfirmDialog.module.css'
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function DeleteConfirmDialog({ isOpen, todoTitle, onConfirm, onCancel }: Props) {
+  const { t } = useI18n()
   const [isDeleting, setIsDeleting] = useState(false)
 
   if (!isOpen) return null
@@ -34,9 +36,9 @@ export default function DeleteConfirmDialog({ isOpen, todoTitle, onConfirm, onCa
       onClick={handleBackdropClick}
     >
       <div className={dialogStyles.dialog} role="dialog" aria-modal="true">
-        <p className={dialogStyles.question}>할일을 삭제하시겠습니까?</p>
+        <p className={dialogStyles.question}>{t('deleteQuestion')}</p>
         <p className={dialogStyles.todoTitle}>"{todoTitle}"</p>
-        <p className={dialogStyles.warning}>삭제된 항목은 복구할 수 없습니다.</p>
+        <p className={dialogStyles.warning}>{t('deleteWarning')}</p>
         <div className={dialogStyles.buttons}>
           <button
             type="button"
@@ -44,7 +46,7 @@ export default function DeleteConfirmDialog({ isOpen, todoTitle, onConfirm, onCa
             onClick={onCancel}
             disabled={isDeleting}
           >
-            취소
+            {t('cancel')}
           </button>
           <button
             type="button"
@@ -52,7 +54,7 @@ export default function DeleteConfirmDialog({ isOpen, todoTitle, onConfirm, onCa
             onClick={handleConfirm}
             disabled={isDeleting}
           >
-            {isDeleting ? '삭제 중...' : '삭제'}
+            {isDeleting ? t('deletingLabel') : t('delete')}
           </button>
         </div>
       </div>

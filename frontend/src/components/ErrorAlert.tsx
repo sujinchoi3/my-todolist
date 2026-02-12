@@ -1,13 +1,6 @@
 import { useEffect } from 'react'
+import { useI18n } from '../contexts/I18nContext'
 import styles from './ErrorAlert.module.css'
-
-const STATUS_MESSAGES: Record<number, string> = {
-  401: '로그인이 필요합니다.',
-  403: '접근 권한이 없습니다.',
-  404: '찾을 수 없습니다.',
-  400: '입력이 유효하지 않습니다.',
-  500: '서버 오류가 발생했습니다.',
-}
 
 interface Props {
   message?: string
@@ -17,7 +10,18 @@ interface Props {
 }
 
 export default function ErrorAlert({ message, statusCode, onClose, autoClose }: Props) {
-  const displayMessage = message ?? (statusCode ? STATUS_MESSAGES[statusCode] : undefined)
+  const { t } = useI18n()
+
+  function getStatusMessage(code: number): string | undefined {
+    if (code === 400) return t('error400')
+    if (code === 401) return t('error401')
+    if (code === 403) return t('error403')
+    if (code === 404) return t('error404')
+    if (code === 500) return t('error500')
+    return undefined
+  }
+
+  const displayMessage = message ?? (statusCode ? getStatusMessage(statusCode) : undefined)
 
   useEffect(() => {
     if (!autoClose || !displayMessage) return
@@ -34,7 +38,7 @@ export default function ErrorAlert({ message, statusCode, onClose, autoClose }: 
         type="button"
         className={styles.closeBtn}
         onClick={onClose}
-        aria-label="에러 닫기"
+        aria-label={t('errorClose')}
       >
         ✕
       </button>

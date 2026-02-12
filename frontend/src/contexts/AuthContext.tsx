@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { apiClient, setAccessToken } from '../api/client'
-import type { LoginResponse, User } from '../types/api'
+import type { LoginResponse, SignupResponse, User } from '../types/api'
 
 interface AuthState {
   user: User | null
