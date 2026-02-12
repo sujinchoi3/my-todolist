@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import LoginPage from './LoginPage'
 import * as AuthContextModule from '../contexts/AuthContext'
 import { ApiRequestError } from '../api/client'
+import { I18nProvider } from '../contexts/I18nContext'
 
 vi.mock('../contexts/AuthContext', async (importOriginal) => {
   const original = await importOriginal<typeof AuthContextModule>()
@@ -27,13 +28,15 @@ function makeAuthMock(overrides?: Partial<ReturnType<typeof AuthContextModule.us
 
 function renderLoginPage(initialPath = '/login') {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<div>홈 페이지</div>} />
-        <Route path="/signup" element={<div>회원가입 페이지</div>} />
-      </Routes>
-    </MemoryRouter>,
+    <I18nProvider>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<div>홈 페이지</div>} />
+          <Route path="/signup" element={<div>회원가입 페이지</div>} />
+        </Routes>
+      </MemoryRouter>
+    </I18nProvider>,
   )
 }
 

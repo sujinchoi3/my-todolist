@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute, PublicOnlyRoute } from './ProtectedRoute'
 import * as AuthContextModule from '../contexts/AuthContext'
+import { I18nProvider } from '../contexts/I18nContext'
 
 vi.mock('../contexts/AuthContext', async (importOriginal) => {
   const original = await importOriginal<typeof AuthContextModule>()
@@ -11,26 +12,30 @@ vi.mock('../contexts/AuthContext', async (importOriginal) => {
 
 function renderWithRouter(ui: React.ReactElement, initialPath = '/') {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route path="/" element={ui} />
-        <Route path="/login" element={<div>로그인 페이지</div>} />
-        <Route path="/signup" element={<div>회원가입 페이지</div>} />
-        <Route path="/home" element={ui} />
-      </Routes>
-    </MemoryRouter>,
+    <I18nProvider>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <Routes>
+          <Route path="/" element={ui} />
+          <Route path="/login" element={<div>로그인 페이지</div>} />
+          <Route path="/signup" element={<div>회원가입 페이지</div>} />
+          <Route path="/home" element={ui} />
+        </Routes>
+      </MemoryRouter>
+    </I18nProvider>,
   )
 }
 
 function renderPublicRoute(ui: React.ReactElement, path = '/login') {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/" element={<div>홈 페이지</div>} />
-        <Route path="/login" element={ui} />
-        <Route path="/signup" element={ui} />
-      </Routes>
-    </MemoryRouter>,
+    <I18nProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/" element={<div>홈 페이지</div>} />
+          <Route path="/login" element={ui} />
+          <Route path="/signup" element={ui} />
+        </Routes>
+      </MemoryRouter>
+    </I18nProvider>,
   )
 }
 

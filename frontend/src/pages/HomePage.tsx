@@ -20,6 +20,7 @@ export default function HomePage() {
 
   const [overdue, setOverdue] = useState<Todo[]>([])
   const [normal, setNormal] = useState<Todo[]>([])
+  const [completed, setCompleted] = useState<Todo[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [apiError, setApiError] = useState('')
 
@@ -41,7 +42,8 @@ export default function HomePage() {
     try {
       const data = await apiClient.get<TodoListResponse>(url)
       setOverdue(data.overdue)
-      setNormal(data.normal)
+      setNormal(data.normal.filter((t) => t.status === 'pending'))
+      setCompleted(data.normal.filter((t) => t.status === 'completed'))
     } catch {
       // 목록 조회 실패 시 빈 목록 유지
     }
@@ -80,7 +82,7 @@ export default function HomePage() {
   }
 
   async function handleToggle(id: string) {
-    const allTodos = [...overdue, ...normal]
+    const allTodos = [...overdue, ...normal, ...completed]
     const todo = allTodos.find((t) => t.todo_id === id)
     if (!todo) return
 
@@ -90,6 +92,7 @@ export default function HomePage() {
       list.map((t) => (t.todo_id === id ? { ...t, status: newStatus } : t))
     setOverdue((prev) => update(prev))
     setNormal((prev) => update(prev))
+    setCompleted((prev) => update(prev))
 
     try {
       await apiClient.patch(`/todos/${id}/status`, { status: newStatus })
@@ -99,6 +102,7 @@ export default function HomePage() {
         list.map((t) => (t.todo_id === id ? { ...t, status: todo.status } : t))
       setOverdue((prev) => rollback(prev))
       setNormal((prev) => rollback(prev))
+      setCompleted((prev) => rollback(prev))
       setApiError(t('toggleFailed'))
     }
   }
@@ -110,7 +114,7 @@ export default function HomePage() {
     fetchTodos()
   }
 
-  const isEmpty = overdue.length === 0 && normal.length === 0
+  const isEmpty = overdue.length === 0 && normal.length === 0 && completed.length === 0
 
   return (
     <div className={styles.pageWrapper}>
@@ -238,6 +242,23 @@ export default function HomePage() {
                         onToggle={handleToggle}
                         onEdit={handleEditOpen}
                         onDelete={(id) => setDeleteTodo(normal.find((t) => t.todo_id === id) ?? null)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {completed.length > 0 && (
+                <section className={styles.group}>
+                  <h2 className={styles.groupHeaderCompleted}>{t('completedGroup', { n: completed.length })}</h2>
+                  <div className={styles.todoList}>
+                    {completed.map((todo) => (
+                      <TodoCard
+                        key={todo.todo_id}
+                        todo={todo}
+                        onToggle={handleToggle}
+                        onEdit={handleEditOpen}
+                        onDelete={(id) => setDeleteTodo(completed.find((t) => t.todo_id === id) ?? null)}
                       />
                     ))}
                   </div>

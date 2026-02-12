@@ -46,6 +46,7 @@ const ko = {
   emptySubtitle: '아래 버튼으로 첫 할일을 추가해보세요!',
   overdueGroup: '⚠ 기한 초과 ({n}건)',
   normalGroup: '할일 목록 ({n}건)',
+  completedGroup: '✓ 완료됨 ({n}건)',
   addTodo: '+ 할일 추가',
   fetchTodoFailed: '할일 정보를 불러오지 못했습니다.',
   toggleFailed: '상태 변경에 실패했습니다.',
