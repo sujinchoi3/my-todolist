@@ -1,0 +1,56 @@
+.dialog {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.question {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3);
+}
+
+.todoTitle {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3);
+}
+
+.warning {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-6);
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.deleteBtn {
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-error);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.deleteBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.deleteBtn:disabled {
+  background-color: var(--color-border);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}

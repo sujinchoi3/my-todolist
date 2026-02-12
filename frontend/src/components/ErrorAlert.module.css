@@ -1,0 +1,27 @@
+.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  font-size: 13px;
+  margin-bottom: var(--space-3);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-error);
+  font-size: 12px;
+  padding: 0;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  opacity: 0.7;
+}

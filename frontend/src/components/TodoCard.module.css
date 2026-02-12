@@ -1,0 +1,127 @@
+.card {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.15s;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.overdue {
+  border-left-color: var(--color-error);
+  background-color: var(--color-primary-light);
+}
+
+.completed {
+  border-left-color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+.main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.checkbox {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--color-success);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.completed .title {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+
+.overdue .title {
+  color: var(--color-error);
+}
+
+.description {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  word-break: break-word;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.dueDate {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.overdue .dueDate {
+  color: var(--color-error);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  transition: background-color 0.1s;
+}
+
+.actionBtn:hover {
+  background-color: var(--color-surface);
+}
+
+.deleteBtn:hover {
+  color: var(--color-error);
+}
+
+@media (max-width: 480px) {
+  .main {
+    flex-wrap: wrap;
+  }
+
+  .meta {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-left: calc(16px + var(--space-3));
+  }
+
+  .actions {
+    margin-left: auto;
+  }
+}

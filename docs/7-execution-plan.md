@@ -451,14 +451,14 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `npm create vite@latest my-todolist-web -- --template react-ts` 실행
-- [ ] `package.json` 업데이트 (React 19, TypeScript 최신)
-- [ ] `vite.config.ts` 작성 (proxy 설정 선택)
-- [ ] `tsconfig.json` 작성 (strict: true)
-- [ ] 폴더 구조 생성: src/{components, pages, hooks, contexts, api, types, utils, styles}
-- [ ] `.env.example` 작성 (VITE_API_BASE_URL=http://localhost:3000/api)
-- [ ] `npm install` 실행 완료
-- [ ] `npm run dev` 실행 확인
+- [x] `npm create vite@latest my-todolist-web -- --template react-ts` 실행
+- [x] `package.json` 업데이트 (React 19, TypeScript 최신)
+- [x] `vite.config.ts` 작성 (proxy 설정 선택)
+- [x] `tsconfig.json` 작성 (strict: true)
+- [x] 폴더 구조 생성: src/{components, pages, hooks, contexts, api, types, utils, styles}
+- [x] `.env.example` 작성 (VITE_API_BASE_URL=http://localhost:3000/api)
+- [x] `npm install` 실행 완료
+- [x] `npm run dev` 실행 확인
 
 **의존성**:
 - 선행 필요: 없음
@@ -475,16 +475,16 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/api/client.ts` 작성 (fetch 래퍼)
-- [ ] 요청 인터셉터: Authorization 헤더에 Access Token 자동 추가
-- [ ] 응답 인터셉터:
-  - [ ] 401 에러 시 Refresh Token으로 토큰 갱신 시도
-  - [ ] 갱신 성공 시 원래 요청 재시도
-  - [ ] 갱신 실패 시 로그인 페이지로 리다이렉트
-- [ ] 기본 설정: credentials: 'include' (HttpOnly Cookie 전송)
-- [ ] 에러 응답 형식 정의 (ApiError 타입)
-- [ ] `src/types/api.ts` 작성 (API 응답 타입 정의)
-- [ ] AC-05 지원 (미인증 API 접근 시 401 + 로그인 리다이렉트)
+- [x] `src/api/client.ts` 작성 (fetch 래퍼)
+- [x] 요청 인터셉터: Authorization 헤더에 Access Token 자동 추가
+- [x] 응답 인터셉터:
+  - [x] 401 에러 시 Refresh Token으로 토큰 갱신 시도
+  - [x] 갱신 성공 시 원래 요청 재시도
+  - [x] 갱신 실패 시 로그인 페이지로 리다이렉트
+- [x] 기본 설정: credentials: 'include' (HttpOnly Cookie 전송)
+- [x] 에러 응답 형식 정의 (ApiError 타입)
+- [x] `src/types/api.ts` 작성 (API 응답 타입 정의)
+- [x] AC-05 지원 (미인증 API 접근 시 401 + 로그인 리다이렉트)
 
 **의존성**:
 - 선행 필요: FE-01, BE-04, BE-05, BE-06
@@ -501,14 +501,14 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/contexts/AuthContext.tsx` 작성
-- [ ] 상태: { user, access_token, isLoading, error }
-- [ ] 함수: { login(), signup(), logout(), refreshToken() }
-- [ ] Access Token은 메모리 저장 (상태 변수)
-- [ ] Refresh Token은 HttpOnly Cookie에 저장 (서버에서 관리)
-- [ ] 초기화: 페이지 새로고침 시 Refresh Token으로 토큰 갱신 시도
-- [ ] `src/hooks/useAuth.ts` 작성 (AuthContext 접근 편의)
-- [ ] localStorage 사용 금지
+- [x] `src/contexts/AuthContext.tsx` 작성
+- [x] 상태: { user, access_token, isLoading, error }
+- [x] 함수: { login(), signup(), logout(), refreshToken() }
+- [x] Access Token은 메모리 저장 (상태 변수)
+- [x] Refresh Token은 HttpOnly Cookie에 저장 (서버에서 관리)
+- [x] 초기화: 페이지 새로고침 시 Refresh Token으로 토큰 갱신 시도
+- [x] `src/hooks/useAuth.ts` 작성 (AuthContext 접근 편의)
+- [x] localStorage 사용 금지
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, BE-03, BE-04
@@ -525,12 +525,12 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/App.tsx` 작성 (Router 설정)
-- [ ] 라우트 정의: /login, /signup, /
-- [ ] ProtectedRoute 컴포넌트 작성 (인증 여부 확인)
-- [ ] 미인증 사용자: /login으로 리다이렉트
-- [ ] 로그인된 사용자: /login, /signup에서 /로 리다이렉트 (선택)
-- [ ] AuthContext 활용
+- [x] `src/App.tsx` 작성 (Router 설정)
+- [x] 라우트 정의: /login, /signup, /
+- [x] ProtectedRoute 컴포넌트 작성 (인증 여부 확인)
+- [x] 미인증 사용자: /login으로 리다이렉트
+- [x] 로그인된 사용자: /login, /signup에서 /로 리다이렉트 (선택)
+- [x] AuthContext 활용
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03
@@ -547,14 +547,14 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/pages/LoginPage.tsx` 작성
-- [ ] 폼 요소: email (텍스트), password (비밀번호), submit (버튼)
-- [ ] 유효성 검사: email 형식, password 필수
-- [ ] 제출 시 POST /api/auth/login 호출 (useAuth().login())
-- [ ] 성공: access_token 메모리 저장, user 상태 업데이트, / 리다이렉트
-- [ ] 실패: 에러 메시지 표시 (401 등)
-- [ ] 로딩 상태 표시 (버튼 비활성화)
-- [ ] AC-03, AC-04 만족 (로그인 성공/실패)
+- [x] `src/pages/LoginPage.tsx` 작성
+- [x] 폼 요소: email (텍스트), password (비밀번호), submit (버튼)
+- [x] 유효성 검사: email 형식, password 필수
+- [x] 제출 시 POST /api/auth/login 호출 (useAuth().login())
+- [x] 성공: access_token 메모리 저장, user 상태 업데이트, / 리다이렉트
+- [x] 실패: 에러 메시지 표시 (401 등)
+- [x] 로딩 상태 표시 (버튼 비활성화)
+- [x] AC-03, AC-04 만족 (로그인 성공/실패)
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03, FE-04
@@ -571,14 +571,14 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/pages/SignupPage.tsx` 작성
-- [ ] 폼 요소: email (텍스트), password (비밀번호), name (텍스트), submit (버튼)
-- [ ] 유효성 검사: email 형식, password (최소 8자), name 필수
-- [ ] 제출 시 POST /api/auth/signup 호출 (useAuth().signup())
-- [ ] 성공: /login으로 리다이렉트 (또는 자동 로그인)
-- [ ] 실패: 에러 메시지 표시 (400: 중복 이메일 등)
-- [ ] 로딩 상태 표시
-- [ ] AC-01, AC-02 만족 (회원가입 성공/중복 이메일 차단)
+- [x] `src/pages/SignupPage.tsx` 작성
+- [x] 폼 요소: email (텍스트), password (비밀번호), name (텍스트), submit (버튼)
+- [x] 유효성 검사: email 형식, password (최소 8자), name 필수
+- [x] 제출 시 POST /api/auth/signup 호출 (useAuth().signup())
+- [x] 성공: /login으로 리다이렉트 (또는 자동 로그인)
+- [x] 실패: 에러 메시지 표시 (400: 중복 이메일 등)
+- [x] 로딩 상태 표시
+- [x] AC-01, AC-02 만족 (회원가입 성공/중복 이메일 차단)
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03, FE-04
@@ -595,21 +595,21 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/pages/HomePage.tsx` 작성
-- [ ] 페이지 로드 시 GET /api/todos?... 호출
-- [ ] UI 요소:
-  - [ ] 검색바 (q 파라미터, 입력 시 실시간 또는 Enter 검색)
-  - [ ] 상태 필터 (pending, completed 라디오 또는 탭)
-  - [ ] 정렬 드롭다운 (due_date_asc(기본), due_date_desc, created_at_asc, created_at_desc)
-  - [ ] 할일 추가 버튼 (FE-08로 이동)
-- [ ] 할일 목록 표시:
-  - [ ] 기한 초과 그룹 (상단, 빨간 색상/아이콘 - AC-11)
-  - [ ] 일반 항목 그룹 (하단)
-  - [ ] 각 할일: 체크박스, 제목, 설명 요약, 기한, 완료/수정/삭제 버튼
-- [ ] 각 할일 행: 클릭 시 수정 페이지로 이동 (FE-09)
-- [ ] 로딩 상태 표시
-- [ ] 할일 없음: 빈 상태 메시지
-- [ ] AC-11 만족 (기한 초과 항목 최상단 그룹 표시)
+- [x] `src/pages/HomePage.tsx` 작성
+- [x] 페이지 로드 시 GET /api/todos?... 호출
+- [x] UI 요소:
+  - [x] 검색바 (q 파라미터, 입력 시 실시간 또는 Enter 검색)
+  - [x] 상태 필터 (pending, completed 라디오 또는 탭)
+  - [x] 정렬 드롭다운 (due_date_asc(기본), due_date_desc, created_at_asc, created_at_desc)
+  - [x] 할일 추가 버튼 (FE-08로 이동)
+- [x] 할일 목록 표시:
+  - [x] 기한 초과 그룹 (상단, 빨간 색상/아이콘 - AC-11)
+  - [x] 일반 항목 그룹 (하단)
+  - [x] 각 할일: 체크박스, 제목, 설명 요약, 기한, 완료/수정/삭제 버튼
+- [x] 각 할일 행: 클릭 시 수정 페이지로 이동 (FE-09)
+- [x] 로딩 상태 표시
+- [x] 할일 없음: 빈 상태 메시지
+- [x] AC-11 만족 (기한 초과 항목 최상단 그룹 표시)
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03, FE-04, BE-09
@@ -626,15 +626,15 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/components/TodoForm.tsx` 작성 (재사용 가능)
-- [ ] 또는 `src/pages/NewTodoPage.tsx` 작성
-- [ ] 폼 요소: title (텍스트), description (텍스트 영역), due_date (날짜 입력)
-- [ ] 유효성 검사: title 필수, due_date 선택 사항
-- [ ] 제출 시 POST /api/todos 호출
-- [ ] 성공: 할일 생성됨, / 페이지로 리다이렉트 또는 목록 새로고침
-- [ ] 실패: 에러 메시지 표시
-- [ ] 취소 버튼 (이전 페이지로 돌아가기)
-- [ ] AC-06 만족 (할일 생성 성공, 목록 즉시 반영)
+- [x] `src/components/TodoForm.tsx` 작성 (재사용 가능)
+- [x] 또는 `src/pages/NewTodoPage.tsx` 작성
+- [x] 폼 요소: title (텍스트), description (텍스트 영역), due_date (날짜 입력)
+- [x] 유효성 검사: title 필수, due_date 선택 사항
+- [x] 제출 시 POST /api/todos 호출
+- [x] 성공: 할일 생성됨, / 페이지로 리다이렉트 또는 목록 새로고침
+- [x] 실패: 에러 메시지 표시
+- [x] 취소 버튼 (이전 페이지로 돌아가기)
+- [x] AC-06 만족 (할일 생성 성공, 목록 즉시 반영)
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03, FE-04, FE-07, BE-08
@@ -651,15 +651,15 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/pages/EditTodoPage.tsx` 작성
-- [ ] 페이지 로드 시 GET /api/todos/:id 호출
-- [ ] 폼에 기존값 pre-fill (title, description, due_date, status)
-- [ ] 유효성 검사: title 필수
-- [ ] 제출 시 PUT /api/todos/:id 호출
-- [ ] 성공: / 또는 이전 페이지로 리다이렉트, 목록 새로고침
-- [ ] 실패: 에러 메시지 표시
-- [ ] 타인 할일 접근 시 에러 처리 (AC-12)
-- [ ] AC-08 만족 (할일 수정 즉시 반영)
+- [x] `src/pages/EditTodoPage.tsx` 작성
+- [x] 페이지 로드 시 GET /api/todos/:id 호출
+- [x] 폼에 기존값 pre-fill (title, description, due_date, status)
+- [x] 유효성 검사: title 필수
+- [x] 제출 시 PUT /api/todos/:id 호출
+- [x] 성공: / 또는 이전 페이지로 리다이렉트, 목록 새로고침
+- [x] 실패: 에러 메시지 표시
+- [x] 타인 할일 접근 시 에러 처리 (AC-12)
+- [x] AC-08 만족 (할일 수정 즉시 반영)
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03, FE-04, FE-07, BE-10, BE-11
@@ -676,12 +676,12 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/components/TodoItem.tsx` 작성 (할일 행 컴포넌트)
-- [ ] 체크박스 요소: checked = (status === 'completed')
-- [ ] 클릭 시 PATCH /api/todos/:id/status 호출
-- [ ] 성공: status 즉시 업데이트, UI 반영 (체크박스 상태 변경)
-- [ ] 실패: 에러 메시지 표시, 상태 롤백
-- [ ] AC-10 만족 (완료 토글)
+- [x] `src/components/TodoItem.tsx` 작성 (할일 행 컴포넌트)
+- [x] 체크박스 요소: checked = (status === 'completed')
+- [x] 클릭 시 PATCH /api/todos/:id/status 호출
+- [x] 성공: status 즉시 업데이트, UI 반영 (체크박스 상태 변경)
+- [x] 실패: 에러 메시지 표시, 상태 롤백
+- [x] AC-10 만족 (완료 토글)
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03, FE-04, FE-07, BE-12
@@ -698,12 +698,12 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/components/TodoItem.tsx` 또는 별도 컴포넌트에 삭제 버튼 추가
-- [ ] 삭제 버튼 클릭 시 확인 다이얼로그 표시 (window.confirm 또는 커스텀 모달)
-- [ ] 확인 시 DELETE /api/todos/:id 호출
-- [ ] 성공: 목록에서 할일 제거 (또는 목록 새로고침)
-- [ ] 실패: 에러 메시지 표시
-- [ ] AC-09 만족 (삭제 확인 후 영구 삭제)
+- [x] `src/components/TodoItem.tsx` 또는 별도 컴포넌트에 삭제 버튼 추가
+- [x] 삭제 버튼 클릭 시 확인 다이얼로그 표시 (window.confirm 또는 커스텀 모달)
+- [x] 확인 시 DELETE /api/todos/:id 호출
+- [x] 성공: 목록에서 할일 제거 (또는 목록 새로고침)
+- [x] 실패: 에러 메시지 표시
+- [x] AC-09 만족 (삭제 확인 후 영구 삭제)
 
 **의존성**:
 - 선행 필요: FE-01, FE-02, FE-03, FE-04, FE-07, BE-13
@@ -720,14 +720,14 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/styles/globals.css` 또는 Tailwind CSS 설정
-- [ ] 모바일 (375px): 단일 열 레이아웃, 터치 친화적 버튼 (최소 44px)
-- [ ] 데스크톱 (1280px): 2+ 열 또는 여유 있는 레이아웃
-- [ ] 폰트 크기 조정 (모바일 14px ~ 데스크톱 16px)
-- [ ] 입력 필드 반응형 (width: 100% ~ max-width 설정)
-- [ ] 테이블/목록 스크롤 지원 (모바일에서 가로 스크롤)
-- [ ] 테스트: Chrome DevTools 모바일 에뮬레이션으로 확인
-- [ ] AC-13 만족 (모바일/데스크톱 반응형 동작)
+- [x] `src/styles/globals.css` 또는 Tailwind CSS 설정
+- [x] 모바일 (375px): 단일 열 레이아웃, 터치 친화적 버튼 (최소 44px)
+- [x] 데스크톱 (1280px): 2+ 열 또는 여유 있는 레이아웃
+- [x] 폰트 크기 조정 (모바일 14px ~ 데스크톱 16px)
+- [x] 입력 필드 반응형 (width: 100% ~ max-width 설정)
+- [x] 테이블/목록 스크롤 지원 (모바일에서 가로 스크롤)
+- [x] 테스트: Chrome DevTools 모바일 에뮬레이션으로 확인
+- [x] AC-13 만족 (모바일/데스크톱 반응형 동작)
 
 **의존성**:
 - 선행 필요: FE-01, FE-05, FE-06, FE-07, FE-08, FE-09, FE-10, FE-11
@@ -744,17 +744,17 @@
 **담당**: Frontend
 
 **완료 조건**:
-- [ ] `src/components/LoadingSpinner.tsx` 작성
-- [ ] `src/components/ErrorAlert.tsx` 작성
-- [ ] 로딩 인디케이터: 스핀 애니메이션, 진행 상태 표시
-- [ ] 에러 메시지: 상단 또는 인라인 경고 표시
-- [ ] API 에러 매핑: 에러 코드 → 사용자 친화적 메시지
-  - [ ] 401: "로그인이 필요합니다"
-  - [ ] 403: "접근 권한이 없습니다"
-  - [ ] 404: "찾을 수 없습니다"
-  - [ ] 400: "입력이 유효하지 않습니다: {상세}"
-  - [ ] 500: "서버 오류가 발생했습니다"
-- [ ] 자동 닫기 또는 닫기 버튼 제공
+- [x] `src/components/LoadingSpinner.tsx` 작성
+- [x] `src/components/ErrorAlert.tsx` 작성
+- [x] 로딩 인디케이터: 스핀 애니메이션, 진행 상태 표시
+- [x] 에러 메시지: 상단 또는 인라인 경고 표시
+- [x] API 에러 매핑: 에러 코드 → 사용자 친화적 메시지
+  - [x] 401: "로그인이 필요합니다"
+  - [x] 403: "접근 권한이 없습니다"
+  - [x] 404: "찾을 수 없습니다"
+  - [x] 400: "입력이 유효하지 않습니다: {상세}"
+  - [x] 500: "서버 오류가 발생했습니다"
+- [x] 자동 닫기 또는 닫기 버튼 제공
 
 **의존성**:
 - 선행 필요: FE-01, FE-02
@@ -773,14 +773,14 @@
 **담당**: QA / Backend + Frontend
 
 **완료 조건**:
-- [ ] 회원가입 페이지: 새 사용자 이메일, 비밀번호, 이름 입력 후 제출
-- [ ] 검증: 201 응답, 사용자 생성 확인
-- [ ] 로그인 페이지: 방금 생성한 사용자 로그인
-- [ ] 검증: Access Token 메모리 저장, Refresh Token HttpOnly Cookie 저장 확인
-- [ ] 홈 페이지: 로그인된 상태로 진입, 할일 목록 조회
-- [ ] 토큰 갱신: 개발자 도구에서 Access Token 수동 제거 후 API 호출, 자동 갱신 확인
-- [ ] 로그아웃: 로그아웃 버튼 클릭, Refresh Token Cookie 삭제 확인
-- [ ] 검증: 로그인 페이지로 리다이렉트
+- [x] 회원가입 페이지: 새 사용자 이메일, 비밀번호, 이름 입력 후 제출
+- [x] 검증: 201 응답, 사용자 생성 확인
+- [x] 로그인 페이지: 방금 생성한 사용자 로그인
+- [x] 검증: Access Token 메모리 저장, Refresh Token HttpOnly Cookie 저장 확인
+- [x] 홈 페이지: 로그인된 상태로 진입, 할일 목록 조회
+- [x] 토큰 갱신: 개발자 도구에서 Access Token 수동 제거 후 API 호출, 자동 갱신 확인
+- [x] 로그아웃: 로그아웃 버튼 클릭, Refresh Token Cookie 삭제 확인
+- [x] 검증: 로그인 페이지로 리다이렉트
 
 **의존성**:
 - 선행 필요: BE-03, BE-04, BE-05, BE-06, BE-07, FE-05, FE-06, FE-03
@@ -797,17 +797,17 @@
 **담당**: QA / Backend + Frontend
 
 **완료 조건**:
-- [ ] 홈 페이지: 로그인된 상태, 할일 생성 버튼 클릭
-- [ ] 생성 폼: 제목, 설명, 기한 입력 후 제출
-- [ ] 검증: 201 응답, 할일 목록에 즉시 추가 (AC-06)
-- [ ] 목록 조회: 새로 생성된 할일 확인, 정렬/필터/검색 기능 테스트
-- [ ] 기한 초과 테스트: 과거 날짜 할일 생성, 기한 초과 그룹에 표시 확인 (AC-11)
-- [ ] 수정: 할일 클릭, 제목/설명/기한 수정 후 제출
-- [ ] 검증: 200 응답, UI 즉시 반영 (AC-08)
-- [ ] 상태 변경: 체크박스 클릭, 상태 pending → completed 변경
-- [ ] 검증: PATCH 성공 (AC-10)
-- [ ] 삭제: 삭제 버튼 클릭, 확인 다이얼로그 확인 후 삭제
-- [ ] 검증: 204 응답, 목록에서 제거 (AC-09)
+- [x] 홈 페이지: 로그인된 상태, 할일 생성 버튼 클릭
+- [x] 생성 폼: 제목, 설명, 기한 입력 후 제출
+- [x] 검증: 201 응답, 할일 목록에 즉시 추가 (AC-06)
+- [x] 목록 조회: 새로 생성된 할일 확인, 정렬/필터/검색 기능 테스트
+- [x] 기한 초과 테스트: 과거 날짜 할일 생성, 기한 초과 그룹에 표시 확인 (AC-11)
+- [x] 수정: 할일 클릭, 제목/설명/기한 수정 후 제출
+- [x] 검증: 200 응답, UI 즉시 반영 (AC-08)
+- [x] 상태 변경: 체크박스 클릭, 상태 pending → completed 변경
+- [x] 검증: PATCH 성공 (AC-10)
+- [x] 삭제: 삭제 버튼 클릭, 확인 다이얼로그 확인 후 삭제
+- [x] 검증: 204 응답, 목록에서 제거 (AC-09)
 
 **의존성**:
 - 선행 필요: BE-08, BE-09, BE-10, BE-11, BE-12, BE-13, FE-07, FE-08, FE-09, FE-10, FE-11
@@ -824,19 +824,19 @@
 **담당**: QA / Product Manager
 
 **완료 조건**:
-- [ ] AC-01: 회원가입 성공 (201) — 새 사용자 회원가입 시 201 응답 확인
-- [ ] AC-02: 중복 이메일 차단 (400) — 동일 이메일로 재 회원가입 시 400 응답
-- [ ] AC-03: 로그인 성공, Access+Refresh Token 발급 (200) — 로그인 시 200 응답, 토큰 확인
-- [ ] AC-04: 잘못된 자격증명 401 — 잘못된 비밀번호로 로그인 시 401 응답
-- [ ] AC-05: 미인증 API 접근 시 401 + 로그인 리다이렉트 — 토큰 없이 할일 API 호출 시 401, 앱에서 로그인 페이지로 리다이렉트
-- [ ] AC-06: 할일 생성 성공, 목록 즉시 반영 — 생성 후 새로고침 없이 목록에 나타남
-- [ ] AC-07: 미인증 할일 생성 시도 401 — 로그인하지 않은 상태에서 생성 시도 시 401
-- [ ] AC-08: 할일 수정 즉시 반영 — 수정 후 새로고침 없이 UI 업데이트
-- [ ] AC-09: 삭제 확인 후 영구 삭제 — 삭제 버튼 클릭 시 확인 다이얼로그, 확인 후 영구 삭제
-- [ ] AC-10: 완료 토글 (pending ↔ completed) — 체크박스 클릭으로 상태 전환
-- [ ] AC-11: 기한 초과 항목 최상단 그룹 표시 (빨간 색상/아이콘) — 과거 날짜 항목이 목록 최상단에 빨간 색으로 표시
-- [ ] AC-12: 타인 할일 접근 시 403 — 다른 사용자 할일에 직접 접근 시 403 응답
-- [ ] AC-13: 모바일(375px+) / 데스크톱(1280px) 반응형 동작 — 각 해상도에서 레이아웃 정상 작동
+- [x] AC-01: 회원가입 성공 (201) — 새 사용자 회원가입 시 201 응답 확인
+- [x] AC-02: 중복 이메일 차단 (400) — 동일 이메일로 재 회원가입 시 400 응답
+- [x] AC-03: 로그인 성공, Access+Refresh Token 발급 (200) — 로그인 시 200 응답, 토큰 확인
+- [x] AC-04: 잘못된 자격증명 401 — 잘못된 비밀번호로 로그인 시 401 응답
+- [x] AC-05: 미인증 API 접근 시 401 + 로그인 리다이렉트 — 토큰 없이 할일 API 호출 시 401, 앱에서 로그인 페이지로 리다이렉트
+- [x] AC-06: 할일 생성 성공, 목록 즉시 반영 — 생성 후 새로고침 없이 목록에 나타남
+- [x] AC-07: 미인증 할일 생성 시도 401 — 로그인하지 않은 상태에서 생성 시도 시 401
+- [x] AC-08: 할일 수정 즉시 반영 — 수정 후 새로고침 없이 UI 업데이트
+- [x] AC-09: 삭제 확인 후 영구 삭제 — 삭제 버튼 클릭 시 확인 다이얼로그, 확인 후 영구 삭제
+- [x] AC-10: 완료 토글 (pending ↔ completed) — 체크박스 클릭으로 상태 전환
+- [x] AC-11: 기한 초과 항목 최상단 그룹 표시 (빨간 색상/아이콘) — 과거 날짜 항목이 목록 최상단에 빨간 색으로 표시
+- [x] AC-12: 타인 할일 접근 시 403 — 다른 사용자 할일에 직접 접근 시 403 응답
+- [x] AC-13: 모바일(375px+) / 데스크톱(1280px) 반응형 동작 — 각 해상도에서 레이아웃 정상 작동
 
 **의존성**:
 - 선행 필요: INT-01, INT-02
@@ -853,17 +853,17 @@
 **담당**: QA / Frontend
 
 **완료 조건**:
-- [ ] Chrome DevTools 모바일 에뮬레이션: 375px (iPhone SE) 테스트
-  - [ ] 레이아웃 1열 표시, 가로 스크롤 없음
-  - [ ] 버튼 크기 >= 44px
-  - [ ] 텍스트 가독성 (14px+)
-- [ ] iPad 에뮬레이션: 768px 테스트
-  - [ ] 적절한 여백, 레이아웃 조정
-- [ ] 데스크톱: 1280px+ 테스트
-  - [ ] 레이아웃 충분한 공간 활용
-  - [ ] 목록 테이블 또는 카드 형태 정상 표시
-- [ ] 네트워크 속도: Fast 3G로 로딩 시간 확인 (< 3초 목표)
-- [ ] 터치 이벤트: 모바일에서 클릭/스와이프 정상 동작
+- [x] Chrome DevTools 모바일 에뮬레이션: 375px (iPhone SE) 테스트
+  - [x] 레이아웃 1열 표시, 가로 스크롤 없음
+  - [x] 버튼 크기 >= 44px
+  - [x] 텍스트 가독성 (14px+)
+- [x] iPad 에뮬레이션: 768px 테스트
+  - [x] 적절한 여백, 레이아웃 조정
+- [x] 데스크톱: 1280px+ 테스트
+  - [x] 레이아웃 충분한 공간 활용
+  - [x] 목록 테이블 또는 카드 형태 정상 표시
+- [x] 네트워크 속도: Fast 3G로 로딩 시간 확인 (< 3초 목표)
+- [x] 터치 이벤트: 모바일에서 클릭/스와이프 정상 동작
 
 **의존성**:
 - 선행 필요: FE-12, FE-13

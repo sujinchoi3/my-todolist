@@ -67,8 +67,14 @@ export function validateCreateTodo(
     errors.push({ field: 'title', message: '제목은 1자 이상 255자 이하이어야 합니다.' });
   }
 
-  if (typeof due_date !== 'string' || !DATE_REGEX.test(due_date) || isNaN(new Date(due_date).getTime())) {
+  if (typeof due_date !== 'string' || !DATE_REGEX.test(due_date)) {
     errors.push({ field: 'due_date', message: '마감일은 YYYY-MM-DD 형식이어야 합니다.' });
+  } else {
+    const [year, month, day] = due_date.split('-').map(Number);
+    const d = new Date(Date.UTC(year, month - 1, day));
+    if (d.getUTCFullYear() !== year || d.getUTCMonth() + 1 !== month || d.getUTCDate() !== day) {
+      errors.push({ field: 'due_date', message: '마감일은 YYYY-MM-DD 형식이어야 합니다.' });
+    }
   }
 
   if (description !== undefined && description !== null) {

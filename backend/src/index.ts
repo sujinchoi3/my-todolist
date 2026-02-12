@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const swaggerDocument = require('../../swagger/swagger.json');
 import { testConnection } from './config/database';
 import { corsOptions } from './config/cors';
 import authRouter from './routes/authRouter';
@@ -20,6 +23,12 @@ app.use(cors(corsOptions));
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+  swaggerOptions: {
+    withCredentials: true,
+  },
+}));
 
 app.use('/api/auth', authRouter);
 app.use('/api/todos', todoRouter);
