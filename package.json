@@ -7,6 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
+    "dev": "concurrently -n BE,FE -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev:mock": "concurrently -n MOCK,FE -c yellow,green \"node mockup/server.js\" \"npm run dev --prefix frontend\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +22,9 @@
   "bugs": {
     "url": "https://github.com/sujinchoi3/my-todolist/issues"
   },
-  "homepage": "https://github.com/sujinchoi3/my-todolist#readme"
+  "homepage": "https://github.com/sujinchoi3/my-todolist#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "concurrently": "^9.2.1"
+  }
 }

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { apiClient, setAccessToken } from '../api/client'
-import type { LoginResponse, SignupResponse, User } from '../types/api'
+import type { LoginResponse, User } from '../types/api'
 
 interface AuthState {
   user: User | null
@@ -38,31 +38,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   async function login(email: string, password: string) {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }))
-    try {
-      const { access_token, user } = await apiClient.post<LoginResponse>('/auth/login', {
-        email,
-        password,
-      })
-      setAccessToken(access_token)
-      setState({ user, isLoading: false, error: null })
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '로그인에 실패했습니다.'
-      setState((prev) => ({ ...prev, isLoading: false, error: message }))
-      throw err
-    }
+    // isLoading 변경 없음 - LoginPage가 언마운트되면 에러 메시지가 사라지므로
+    // LoginPage에서 isSubmitting 상태로 로딩을 관리
+    const { access_token, user } = await apiClient.post<LoginResponse>('/auth/login', {
+      email,
+      password,
+    })
+    setAccessToken(access_token)
+    setState({ user, isLoading: false, error: null })
   }
 
   async function signup(email: string, password: string, name: string) {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }))
-    try {
-      await apiClient.post<SignupResponse>('/auth/signup', { email, password, name })
-      setState((prev) => ({ ...prev, isLoading: false }))
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '회원가입에 실패했습니다.'
-      setState((prev) => ({ ...prev, isLoading: false, error: message }))
-      throw err
-    }
+    // isLoading 변경 없음 - SignupPage가 언마운트되면 에러 메시지가 사라지므로
+    // SignupPage에서 isSubmitting 상태로 로딩을 관리
+    await apiClient.post<SignupResponse>('/auth/signup', { email, password, name })
   }
 
   async function logout() {

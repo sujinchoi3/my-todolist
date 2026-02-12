@@ -76,9 +76,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     const newToken = await refreshAccessToken()
 
     if (!newToken) {
-      // 갱신 실패 → 로그인 페이지로 리다이렉트
       setAccessToken(null)
-      window.location.href = '/login'
+      const publicPaths = ['/login', '/signup']
+      if (!publicPaths.includes(window.location.pathname)) {
+        window.location.href = '/login'
+      }
       throw new ApiRequestError(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
     }
 

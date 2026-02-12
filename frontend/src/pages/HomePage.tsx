@@ -7,7 +7,7 @@ import TodoFormModal from '../components/TodoFormModal'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorAlert from '../components/ErrorAlert'
-import type { Todo, TodoListResponse, SortOption } from '../types/api'
+import type { Todo, TodoListResponse, SortOption, TodoStatus } from '../types/api'
 import styles from './HomePage.module.css'
 
 type FilterOption = 'all' | 'pending' | 'completed'
@@ -84,7 +84,7 @@ export default function HomePage() {
     const todo = allTodos.find((t) => t.todo_id === id)
     if (!todo) return
 
-    const newStatus = todo.status === 'pending' ? 'completed' : 'pending'
+    const newStatus: TodoStatus = todo.status === 'pending' ? 'completed' : 'pending'
 
     // 즉시 UI 업데이트 (옵티미스틱)
     const update = (list: Todo[]) =>

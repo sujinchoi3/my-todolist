@@ -74,7 +74,7 @@ export async function login(
 
 export async function refreshToken(
   token: string
-): Promise<{ access_token: string }> {
+): Promise<{ access_token: string; user: { user_id: string; email: string; name: string } }> {
   const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
   const jwtSecret = process.env.JWT_SECRET;
 
@@ -84,10 +84,15 @@ export async function refreshToken(
 
   try {
     const decoded = jwt.verify(token, jwtRefreshSecret) as JwtPayload;
+    const user = await findUserByEmail(decoded.email);
+    if (!user) {
+      throw new AppError('REFRESH_TOKEN_EXPIRED', 401, '세션이 만료되었습니다. 다시 로그인해 주세요.');
+    }
     const payload: JwtPayload = { user_id: decoded.user_id, email: decoded.email };
     const access_token = jwt.sign(payload, jwtSecret, { expiresIn: '15m' });
-    return { access_token };
-  } catch (_error) {
+    return { access_token, user: { user_id: user.user_id, email: user.email, name: user.name } };
+  } catch (err) {
+    if (err instanceof AppError) throw err;
     throw new AppError(
       'REFRESH_TOKEN_EXPIRED',
       401,

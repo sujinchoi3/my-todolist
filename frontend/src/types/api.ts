@@ -23,6 +23,7 @@ export interface SignupResponse {
 
 export interface RefreshResponse {
   access_token: string
+  user: User
 }
 
 export type TodoStatus = 'pending' | 'completed'
