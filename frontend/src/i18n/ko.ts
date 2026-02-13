@@ -1,5 +1,5 @@
 const ko = {
-  appTitle: 'my_todolist',
+  appTitle: 'my_todolist2',
   appSubtitle: 'Team CalTalk | 학생 일정 관리',
   loading: '로딩중...',
 
