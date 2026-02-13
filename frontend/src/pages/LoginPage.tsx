@@ -100,7 +100,7 @@ export default function LoginPage() {
                     if (emailError) setEmailError(validateEmail(e.target.value))
                   }}
                   onBlur={handleEmailBlur}
-                  placeholder="example@email.com"
+                  placeholder="example2@email.com"
                   autoComplete="email"
                   disabled={isSubmitting}
                 />
