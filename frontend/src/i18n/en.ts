@@ -48,6 +48,7 @@ const en: Record<TranslationKeys, string> = {
   emptySubtitle: 'Add your first todo below!',
   overdueGroup: '⚠ Overdue ({n})',
   normalGroup: 'Todos ({n})',
+  completedGroup: '✓ Completed ({n})',
   addTodo: '+ Add Todo',
   fetchTodoFailed: 'Failed to load todo.',
   toggleFailed: 'Failed to update status.',

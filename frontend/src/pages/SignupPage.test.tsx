@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { vi } from 'vitest'
 import SignupPage from './SignupPage'
 import * as AuthContextModule from '../contexts/AuthContext'
+import { I18nProvider } from '../contexts/I18nContext'
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -24,9 +25,11 @@ function mockUseAuth(overrides = {}) {
 
 function renderSignupPage() {
   return render(
-    <MemoryRouter>
-      <SignupPage />
-    </MemoryRouter>
+    <I18nProvider>
+      <MemoryRouter>
+        <SignupPage />
+      </MemoryRouter>
+    </I18nProvider>
   )
 }
 

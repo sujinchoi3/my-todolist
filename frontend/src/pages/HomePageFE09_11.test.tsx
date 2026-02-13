@@ -8,6 +8,7 @@ import HomePage from './HomePage'
 import * as AuthContextModule from '../contexts/AuthContext'
 import * as apiClient from '../api/client'
 import type { Todo, TodoListResponse } from '../types/api'
+import { I18nProvider } from '../contexts/I18nContext'
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -59,9 +60,11 @@ function mockApiGet(response: TodoListResponse = listResponse) {
 
 function renderHomePage() {
   return render(
-    <MemoryRouter>
-      <HomePage />
-    </MemoryRouter>
+    <I18nProvider>
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>
+    </I18nProvider>
   )
 }
 
