@@ -1,10 +1,10 @@
 # ERD - my_todolist (Team CalTalk)
 
-**작성일**: 2026-02-11 | **버전**: 1.0 | **상태**: Draft
+**작성일**: 2026-02-11 | **버전**: 1.1 | **상태**: Draft
 
 **기반 문서**:
-- `docs/1-domain-definition.md` (v1.2, 2026-02-10)
-- `docs/2-prd.md` (v1.3, 2026-02-10)
+- `docs/1-domain-definition.md` (v1.3, 2026-02-12)
+- `docs/2-prd.md` (v1.4, 2026-02-12)
 
 ---
 
@@ -68,9 +68,16 @@ erDiagram
 | `created_at` | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP | 계정 생성 일시 |
 | `updated_at` | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP | 계정 정보 수정 일시 |
 
+**제약조건 (실제 DB)**:
+```sql
+CONSTRAINT users_pkey PRIMARY KEY (user_id)
+CONSTRAINT users_email_unique UNIQUE (email)
+CONSTRAINT users_name_length CHECK (char_length(name) >= 1)
+```
+
 **인덱스 전략**:
 - `user_id`: PRIMARY KEY INDEX (자동)
-- `email`: UNIQUE INDEX (자동)
+- `email`: UNIQUE INDEX (자동, `users_email_unique`)
 
 ---
 
@@ -87,15 +94,17 @@ erDiagram
 | `created_at` | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP | 할일 생성 일시 |
 | `updated_at` | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP | 할일 수정 일시 |
 
-**제약조건**:
+**제약조건 (실제 DB)**:
 ```sql
-CONSTRAINT fk_todos_user_id
-  FOREIGN KEY (user_id)
-  REFERENCES users(user_id)
-  ON DELETE CASCADE
-
-CONSTRAINT chk_todos_status
-  CHECK (status IN ('pending', 'completed'))
+CONSTRAINT todos_pkey PRIMARY KEY (todo_id)
+CONSTRAINT todos_user_id_fkey
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+CONSTRAINT todos_status_check
+  CHECK (status = ANY (ARRAY['pending', 'completed']))
+CONSTRAINT todos_title_length
+  CHECK (char_length(title) >= 1)
+CONSTRAINT todos_desc_length
+  CHECK (description IS NULL OR char_length(description) <= 1000)
 ```
 
 ---
@@ -176,15 +185,25 @@ CREATE INDEX idx_todos_user_due_date ON todos(user_id, due_date);
 |--------|---------|---------|------|
 | `is_overdue` | DB 미저장 | 서버 KST(UTC+9) 오늘 날짜 > due_date AND status = 'pending' | 마감 기한 경과 판정 |
 
-**구현 예시 (백엔드)**:
-```javascript
-// Node.js에서 KST 오늘 계산
-const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
-// 2026-02-11 형식 (ISO 8601)
+**구현 방식 (애플리케이션 레이어)**:
 
-// SQL 쿼리
-const isOverdue = todo.status === 'pending' && new Date(todo.due_date) < new Date(today);
+`is_overdue`는 DB에 저장되지 않으며, 백엔드 서비스 레이어에서 계산 후 API 응답에 포함된다.
+
+```typescript
+// backend/src/utils/kst.ts
+export function getTodayKST(): string {
+  const now = new Date();
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kstDate = new Date(now.getTime() + kstOffset);
+  return kstDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+}
+
+export function calcIsOverdue(dueDate: string, status: 'pending' | 'completed'): boolean {
+  return status === 'pending' && getTodayKST() > dueDate;
+}
 ```
+
+> SQL `CURRENT_DATE` 가 아닌 Node.js에서 KST(UTC+9) 오프셋을 직접 계산하는 방식 사용
 
 **UI 표시**:
 - `is_overdue = true` 항목: 목록 최상단 별도 그룹
@@ -281,27 +300,33 @@ DELETE FROM users WHERE user_id = '550e8400-e29b-41d4-a716-446655440000';
 -- 사용자 테이블
 CREATE TABLE users (
   user_id       UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-  email         VARCHAR(255) UNIQUE NOT NULL,
+  email         VARCHAR(255) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   name          VARCHAR(100) NOT NULL,
-  created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-  updated_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT users_email_unique UNIQUE (email),
+  CONSTRAINT users_name_length  CHECK (char_length(name) >= 1)
 );
 
 -- 할일 테이블
 CREATE TABLE todos (
   todo_id     UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID         NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  user_id     UUID         NOT NULL,
   title       VARCHAR(255) NOT NULL,
   description TEXT,
   due_date    DATE         NOT NULL,
-  status      VARCHAR(20)  DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
-  created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+  status      VARCHAR(20)  NOT NULL DEFAULT 'pending',
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT todos_user_id_fkey  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  CONSTRAINT todos_status_check  CHECK (status = ANY (ARRAY['pending', 'completed'])),
+  CONSTRAINT todos_title_length  CHECK (char_length(title) >= 1),
+  CONSTRAINT todos_desc_length   CHECK (description IS NULL OR char_length(description) <= 1000)
 );
 
 -- 인덱스 생성
-CREATE INDEX idx_todos_user_id ON todos(user_id);
+CREATE INDEX idx_todos_user_id  ON todos(user_id);
 CREATE INDEX idx_todos_due_date ON todos(due_date);
 CREATE INDEX idx_todos_status   ON todos(status);
 ```
@@ -352,6 +377,14 @@ erDiagram
 
 | 버전 | 날짜 | 변경 내용 | 변경 사유 |
 |------|------|---------|---------|
+| 1.1 | 2026-02-12 | 실제 DB 스키마 기준 동기화 | postgres-mcp로 실제 스키마 확인 후 반영 |
+| | | - 기반 문서 버전 갱신 (domain-def v1.3, PRD v1.4) | 문서 추적성 향상 |
+| | | - `users_name_length` CHECK 제약 추가 | 실제 DB 반영 |
+| | | - `todos_title_length`, `todos_desc_length` CHECK 제약 추가 | 실제 DB 반영 |
+| | | - §2 제약조건 블록에 실제 제약 이름 명시 | 명확성 향상 |
+| | | - §6.1 DDL 스크립트에 누락 CHECK 3개 추가, `NOT NULL` 수정 | 실제 DB와 일치 |
+| | | - §5.1 is_overdue 구현을 SQL → Node.js KST 함수 방식으로 수정 | 실제 구현 반영 |
+| | | - 부록 A SQL 쿼리에서 is_overdue 제거, 서비스 레이어 코드 추가 | 실제 구현 반영 |
 | 1.0 | 2026-02-11 | ERD 문서 최초 작성 | 도메인 정의서 v1.2, PRD v1.3 기반 설계 문서화 |
 | | | - Mermaid erDiagram 형식으로 ER 관계도 작성 | 시각적 문서화 |
 | | | - users, todos 테이블 상세 명세 | 완전성 확보 |
@@ -370,7 +403,11 @@ erDiagram
 
 ### 사용자별 할일 목록 조회 (마감일 오름차순, is_overdue 계산)
 
+> `is_overdue`는 SQL이 아닌 **애플리케이션 레이어**에서 계산한다.
+> DB에서는 순수 데이터만 조회하고, Node.js의 `calcIsOverdue()` 함수로 KST 기준 판정 후 응답에 포함.
+
 ```sql
+-- DB 쿼리 (is_overdue 미포함)
 SELECT
   t.todo_id,
   t.user_id,
@@ -379,19 +416,25 @@ SELECT
   t.due_date,
   t.status,
   t.created_at,
-  t.updated_at,
-  -- is_overdue 계산 (런타임)
-  CASE
-    WHEN CURRENT_DATE > t.due_date AND t.status = 'pending'
-    THEN true
-    ELSE false
-  END AS is_overdue
+  t.updated_at
 FROM todos t
 WHERE t.user_id = 'user-uuid-here'
 ORDER BY
-  is_overdue DESC,  -- 기한 경과 우선 표시
   t.due_date ASC,   -- 마감일 오름차순
   t.created_at ASC; -- 동일 마감일 시 생성순
+```
+
+```typescript
+// 서비스 레이어에서 is_overdue 계산 후 overdue / normal 분리
+const withOverdue = rows.map((row) => ({
+  ...row,
+  is_overdue: calcIsOverdue(row.due_date, row.status),
+}));
+
+return {
+  overdue: withOverdue.filter((t) => t.is_overdue),
+  normal:  withOverdue.filter((t) => !t.is_overdue),
+};
 ```
 
 ### 회원가입 (INSERT)

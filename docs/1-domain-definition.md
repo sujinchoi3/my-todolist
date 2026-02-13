@@ -1,6 +1,6 @@
 # my_todolist (Team CalTalk) - 도메인 정의서
 
-**작성일**: 2026-02-10 | **버전**: 1.2 | **상태**: Draft
+**작성일**: 2026-02-10 | **버전**: 1.3 | **상태**: Draft
 
 ---
 
@@ -18,8 +18,10 @@
 - 회원가입 및 로그인 기반 인증 서비스
 - 할일 CRUD (생성, 조회, 수정, 삭제)
 - 마감일(Due Date) 기반 일정 목록 조회
-- 마감 기한 경과 항목 시각적 구분
+- 마감 기한 경과 항목 시각적 구분 (목록 최상단 별도 그룹)
+- 완료 항목 별도 섹션 표시 (pending / completed 시각적 분리)
 - 키워드 기반 할일 검색
+- 다국어(KO/EN) 지원 (localStorage 유지)
 
 ---
 
@@ -112,6 +114,12 @@ User (1) ────────── (N) Todo
 - 마감 기한 경과 항목은 UI에서 **목록 최상단에 별도 그룹으로 표시** (색상/아이콘 구분 포함)
 - `is_overdue`는 저장 컬럼이 아닌 조회 시 계산 처리
 
+### 3.4-1 완료 항목 표시 규칙
+
+- `status = completed` 항목은 `pending` 목록과 **별도 섹션으로 분리** 표시
+- 분리는 클라이언트 사이드에서 처리 (API 응답의 `normal` 배열을 `status` 기준으로 구분)
+- 완료 섹션은 할일 목록 하단에 위치하며 별도 헤더로 구분
+
 ### 3.5 일정 목록 조회 규칙
 
 - 인증된 사용자는 자신의 할일 전체 목록을 조회할 수 있음
@@ -153,20 +161,33 @@ User (1) ────────── (N) Todo
 | Method | Endpoint | 인증 필요 | 설명 |
 |--------|----------|----------|------|
 | POST | `/api/auth/signup` | 불필요 | 회원가입 |
-| POST | `/api/auth/login` | 불필요 | 로그인 (토큰 발급) |
+| POST | `/api/auth/login` | 불필요 | 로그인 (Access Token + Refresh Token 발급) |
 | POST | `/api/auth/logout` | 필요 | 로그아웃 (토큰 무효화) |
+| POST | `/api/auth/refresh` | 불필요 (쿠키) | Refresh Token으로 Access Token 재발급 |
 
 ### 할일 API
 
 | Method | Endpoint | 인증 필요 | 설명 |
 |--------|----------|----------|------|
-| GET | `/api/todos` | 필요 | 내 할일 목록 조회 (query: `status`, `sort`) |
-| GET | `/api/todos?q={keyword}` | 필요 | 키워드로 할일 검색 (title, description 대상) |
+| GET | `/api/todos` | 필요 | 내 할일 목록 조회 (query: `status`, `sort`, `q`) |
 | POST | `/api/todos` | 필요 | 할일 생성 |
 | GET | `/api/todos/{todo_id}` | 필요 | 특정 할일 조회 |
 | PUT | `/api/todos/{todo_id}` | 필요 | 할일 수정 |
 | PATCH | `/api/todos/{todo_id}/status` | 필요 | 상태 변경 (완료/미완료) |
 | DELETE | `/api/todos/{todo_id}` | 필요 | 할일 삭제 |
+
+**`GET /api/todos` 응답 구조**
+
+```json
+{
+  "overdue": [ ...Todo[] ],
+  "normal":  [ ...Todo[] ]
+}
+```
+
+- `overdue`: `is_overdue = true`인 항목 (마감 기한 경과, pending 상태)
+- `normal`: 나머지 항목 (`pending` + `completed` 혼합, 클라이언트에서 status로 분리 표시)
+- 쿼리 파라미터: `status` (pending/completed), `sort` (due_date_asc 등), `q` (키워드 검색)
 
 ---
 
@@ -274,3 +295,9 @@ CREATE INDEX idx_todos_status   ON todos(status);
 | | | - 유스케이스 테이블에 "관련 API" 컬럼 추가 | 추적성 향상 |
 | | | - bcrypt cost factor 수치 명시 (12 이상) | 검증 가능성 향상 |
 | | | - 변경 이력 섹션 신설 | 유지보수성 향상 |
+| 1.3 | 2026-02-12 | 구현 완료 기능 반영 | 코드베이스 기준 문서 동기화 |
+| | | - 핵심 특징에 완료항목 별도 섹션 표시, 다국어(KO/EN) 지원 추가 | 신규 기능 반영 |
+| | | - §3.4-1 완료 항목 표시 규칙 신설 | 완료목록 분리 규칙 명문화 |
+| | | - `POST /api/auth/refresh` 엔드포인트 표에 추가 | 누락 항목 보완 |
+| | | - `GET /api/todos` 응답 구조 (`overdue`/`normal`) 명시 | 명확성 향상 |
+| | | - 할일 API 쿼리 파라미터 `q` 통합 정리 | 중복 행 제거 |
